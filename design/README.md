@@ -7,6 +7,7 @@ Figma exports for SwiftTransit. Reference only: nothing here ships in the app bu
 | File | Contents |
 |---|---|
 | `_Design System.png` | Colour primitives, semantic tokens, type scale, spacing, radius |
+| `logo svg.svg` | The "S" mark, single colour `#0F403B` (usage rules in DESIGN.md) |
 | `Onboarding — Light/Dark.png` | 3 onboarding slides |
 | `Auth — Light/Dark.png` | 12 auth screens |
 | `Main App — Light/Dark.png` | 19 customer screens |
@@ -41,7 +42,9 @@ Screens implied by the designs but not drawn (design them in the matching `/arch
 
 ## Damaged files: re-export needed
 
-These 11 files were overwritten by a scripting mistake during project setup (2026-10-11) and now contain contact-sheet montages instead of the original screen. They are left out of git. Re-export them from Figma (same names, same folders), then commit. Until then the same screens are visible on the boards above.
+These 11 files were overwritten by a scripting mistake during project setup (2026-10-11) and now contain contact-sheet montages (1636×888) instead of the original screen (393×852, or 1572×3408 for auth). They are not in `main`. Re-export them from Figma (same names, same folders), check the dimensions, then commit. Until then the same screens are visible on the boards above.
+
+The UI kit's sample content is Tunisian (TND, +216, Sousse). The app is Nigerian: build with naira, `+234` and Lagos content.
 
 - `auth/Enter Email Address.png`
 - `auth/Verification Success.png`

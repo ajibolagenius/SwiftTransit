@@ -1,6 +1,6 @@
 # Scope: SwiftTransit
 
-An on-demand courier app for Tunisia: customers book, pay for and track local deliveries; couriers go online, accept nearby jobs and deliver them. One Expo app for iOS and Android, two roles.
+An on-demand courier app for Nigeria (Lagos first), built as a production-quality portfolio project: customers book, pay for and track local deliveries; couriers go online, accept nearby jobs and deliver them. One Expo app for iOS and Android, two roles.
 
 **Build approach:** Tracer Bullet (stand up a thin end-to-end thread through every layer first, then thicken it).
 **Workflow:** Beta (`/check verify`, then `/test` after each `/develop`). Features touching auth, RLS, storage or money are `· GA` and also get `/check review` plus a `secure-me` pass.
@@ -25,6 +25,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 12 | Wallet & earnings (mock payments) | Slice 4 | planned |
 | 13 | Profile & settings | Slice 4 | planned |
 | 14 | Push notifications | Slice 4 | planned |
+| 15 | Demo mode & showcase | Slice 5 | planned |
 
 ## Foundations
 
@@ -106,7 +107,7 @@ Customer wallet balance, mock top-up, pay with wallet, transaction history; cour
 
 ### 13. Profile & settings
 Profile, edit profile with avatar upload, saved addresses, payment methods (mock), language (English only, wired to i18n), notification settings, help/contact/legal links, logout.
-**Done when:** every profile row leads to a working screen or link and edits persist.
+**Done when:** every profile row leads to a working screen or link, edits persist, and a user can delete their account and personal data in-app (NDPA 2023, store requirement).
 - [ ] Build it: `/develop profile & settings`
 
 ### 14. Push notifications
@@ -114,10 +115,17 @@ Order status updates for customers, new nearby requests for online couriers, cha
 **Done when:** notifications arrive on both platforms for each event and deep-link to the right screen.
 - [ ] Design it (spec): `/architect push notifications`
 
+## Slice 5: Showcase
+
+### 15. Demo mode & showcase · needs a decision
+Let a hiring team try the whole product alone in two minutes: seeded demo customer and courier accounts with fixed test OTPs, a simulated courier that accepts a demo order and drives the route so live tracking is visible on one phone, a weekly demo-data reset (which also keeps the free Supabase project awake), and a README with screenshots, a screen recording, an install link and CI badges.
+**Done when:** a reviewer installs the Android build from the README link, signs in as the demo customer without SMS, books a delivery and watches a simulated courier complete it; demo users cannot see or change real users' data.
+- [ ] Design it (spec): `/architect demo mode & showcase`
+
 ## Deferred
 Out of scope for the current build pass, kept so the plan stays honest.
-- **Real payment provider**: Stripe vs Konnect/Flouci, card tokenisation, payouts · needs a decision · GA
-- **French and Arabic (RTL)**: translations and RTL QA · needs a decision
+- **Real payment provider**: Paystack vs Flutterwave, card tokenisation, payouts · needs a decision · GA
+- **Nigerian languages**: Pidgin, Yoruba, Hausa, Igbo translations · needs a decision
 - **QR scan for tracking numbers**: the scan icon in search fields
 - **Courier approval admin tool**: manual approval in Supabase dashboard until then · needs a decision
 - **Analytics & error tracking (PostHog)**: before public launch

@@ -1,6 +1,6 @@
 # SwiftTransit
 
-Send Anything, Anywhere, Anytime. An on-demand courier app for iOS and Android: customers book and track local deliveries, couriers accept and deliver them.
+Send Anything, Anywhere, Anytime. An on-demand courier app for Nigeria, on iOS and Android: customers book and track local deliveries, couriers accept and deliver them.
 
 > Status: planning. Docs are in place; the Expo scaffold is the next step (scope feature 1).
 
@@ -17,7 +17,7 @@ Send Anything, Anywhere, Anytime. An on-demand courier app for iOS and Android: 
 
 ## Stack
 
-Expo SDK 57 · Expo Router · TypeScript · NativeWind · Reanimated · MapLibre + OpenStreetMap (OpenFreeMap tiles, Photon search) · Supabase · TanStack Query · i18next. Payments are mocked for the MVP.
+Expo SDK 57 · Expo Router · TypeScript · NativeWind · Reanimated · MapLibre + OpenStreetMap (OpenFreeMap tiles, Geoapify search and routing) · Supabase · TanStack Query · i18next. Payments are mocked.
 
 ## Getting started
 

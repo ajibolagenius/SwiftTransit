@@ -233,6 +233,10 @@ Calm, airy and trustworthy. White space, one deep-green action per screen, soft 
 
 Light and dark are both first-class. In dark mode the deep green steps back and the fresh green (`green-500`) becomes the action colour.
 
+The purchased UI kit uses Tunisian sample content (TND, +216, Sousse). Build with Nigerian content instead: naira, `+234`, Lagos addresses and names.
+
+**Logo**: `design/logo svg.svg`, two interlocking shapes forming an "S", single colour. Use `green-900` on light backgrounds, `green-500` or `neutral-0` on dark and on `bg/brand`. The wordmark "SwiftTransit" is set in Urbanist SemiBold beside the mark. Minimum mark size 24 px; clear space = half the mark's width. App icon: mark on `green-200` (as on the splash screen); adaptive icon foreground = mark, background = `green-200`.
+
 ## Colors
 
 Colour tokens come in two layers. Components use **semantic** tokens. Primitives (above) are only referenced by the semantic layer, never directly by a screen.
@@ -297,7 +301,7 @@ Light column is from the board. Dark column is sampled and partly inferred; veri
 
 ### Hierarchy
 
-- **Display** (32/20, Regular): big friendly headlines such as the Home greeting and balances (`TND430,50`). Light weight on purpose; the accent word goes `text/brand` + SemiBold.
+- **Display** (32/20, Regular): big friendly headlines such as the Home greeting and balances (`₦43,050.00`). Light weight on purpose; the accent word goes `text/brand` + SemiBold.
 - **Heading H1 to H5** (32 → 14, SemiBold/Bold): screen titles ("Orders", "Wallet"), sheet titles, section titles.
 - **Subheading** (22 → 13, Medium): card titles, list titles, step titles ("What are you sending?").
 - **Body** (17 → 10, Regular): descriptions, helper text, addresses.
@@ -347,7 +351,7 @@ Small rounded-full tags inside delivery cards: distance ("2.4 km away", brand-su
 
 ### Inputs / Fields
 
-Label above (`label-md`, `text/secondary`), 48 px field with leading icon, 1 px `border/default`, `rounded.xl`. Focus: `border/focus`. Error: `danger` border plus message below in `body-sm`. Phone field has a country prefix (flag + dial code + chevron). OTP is 6 single-digit boxes in two groups of three separated by a dash, auto-advancing, paste-aware, `textContentType="oneTimeCode"` / `autoComplete="sms-otp"`.
+Label above (`label-md`, `text/secondary`), 48 px field with leading icon, 1 px `border/default`, `rounded.xl`. Focus: `border/focus`. Error: `danger` border plus message below in `body-sm`. Phone field has a country prefix (flag + dial code + chevron), defaulting to Nigeria (`+234`). OTP is 6 single-digit boxes in two groups of three separated by a dash, auto-advancing, paste-aware, `textContentType="oneTimeCode"` / `autoComplete="sms-otp"`.
 
 ### Navigation
 

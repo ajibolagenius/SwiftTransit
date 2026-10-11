@@ -1,11 +1,11 @@
 # 0001. Stack and architecture for the SwiftTransit mobile app
 
 **Date**: 2026-10-11
-**Status**: Proposed
+**Status**: Accepted (2026-10-11)
 
 ## Summary
 
-SwiftTransit is one Expo app for iOS and Android that serves two roles: customers who send parcels and couriers who deliver them. We build it with Expo Router and NativeWind on the app side, MapLibre with free OpenStreetMap data for maps, and Supabase as the backend (database, sign in, live updates, file storage). Payments are faked behind one small interface until a real provider is chosen. This spec covers the foundation only; each feature gets its own spec when it is designed.
+SwiftTransit is one Expo app for iOS and Android, for Nigeria, that serves two roles: customers who send parcels and couriers who deliver them. We build it with Expo Router and NativeWind on the app side, MapLibre with free OpenStreetMap data for maps, and Supabase as the backend (database, sign in, live updates, file storage). Payments are faked behind one small interface until a real provider is chosen. Everything runs on free tiers because this is a portfolio project, and reviewers can try it with demo accounts. This spec covers the foundation only; each feature gets its own spec when it is designed.
 
 ## Requirements
 
@@ -47,16 +47,17 @@ Build with development builds (not Expo Go, because MapLibre and native sign-in 
 | Sheets & modals | Expo Router `formSheet` / `modal` presentations | Native sheets, no extra library |
 | Maps | `@maplibre/maplibre-react-native` 11 | Open source, no vendor token or per-load fee |
 | Basemap tiles | OpenFreeMap `positron` (light) / `dark` | Free OSM vector tiles, matches the grey map in designs |
-| Geocoding & search | Photon (komoot) | OSM-based autocomplete; public instance for dev, self-host or paid instance for production |
-| Routing & ETA | OSRM-compatible HTTP API behind one module | Public demo for dev only; production host decided in the live-tracking spec |
+| Geocoding & search | Geoapify Geocoding + Autocomplete, called through a Supabase Edge Function (`geo`) | OSM-based, free tier allows commercial use (3,000 credits/day), key stays server-side; results biased to Nigeria |
+| Routing & ETA | Geoapify Routing through the same `geo` Edge Function | One provider and key for search and routes; the public OSRM demo is non-commercial and 1 req/s, so dev-only |
 | Location | `expo-location` (+ `expo-task-manager` for courier background updates) | Foreground for customers, background only while a courier is on a delivery |
 | Server state | TanStack Query 5 | Caching, retries, offline-friendly refetch |
 | Local UI state | Zustand 5 (new-delivery wizard draft only) | Draft spans six routes; everything else is server or component state |
 | Forms & validation | react-hook-form 7 + zod 4 | Same zod schemas validate client input and edge function input |
 | Backend | Supabase: Postgres + RLS, Auth, Realtime, Storage, Edge Functions | All five needs (auth incl. phone OTP, relational orders, live tracking, chat, file uploads) in one service. See rationale |
-| Auth | Supabase Auth: phone OTP (SMS provider: Twilio Verify, to confirm for Tunisia), email OTP, Google (`@react-native-google-signin/google-signin` + `signInWithIdToken`), Apple (`expo-apple-authentication` + `signInWithIdToken`, iOS; OAuth on Android) | Matches the four sign-in options in the designs |
+| Auth | Supabase Auth: phone OTP (sent through the Send SMS hook → Edge Function → Termii, see *SMS*), email OTP (custom SMTP: Resend), Google (`@react-native-google-signin/google-signin` + `signInWithIdToken`), Apple (`expo-apple-authentication` + `signInWithIdToken`, iOS; OAuth on Android) | Matches the four sign-in options in the designs |
 | Session storage | Supabase session encrypted with AES, key in `expo-secure-store`, ciphertext in `expo-sqlite` kv-store | SecureStore alone is too small for the session; plain storage would leave tokens readable |
-| Payments | `PaymentProvider` interface + `MockPaymentProvider` | Real provider (Stripe vs Konnect/Flouci) undecided; UI built once |
+| Payments | `PaymentProvider` interface + `MockPaymentProvider` | Real provider later (Paystack or Flutterwave for Nigeria); UI built once |
+| Money & locale | Integer kobo; `Intl.NumberFormat('en-NG')`; `libphonenumber-js` with `NG` default | Exact arithmetic; Nigerian formats |
 | Push | `expo-notifications` + Expo Push Service, sent from Edge Functions | Order status and new-request alerts |
 | i18n | i18next + react-i18next + `expo-localization` | English now; French/Arabic later without refactor |
 | Testing | Jest (`jest-expo`) + React Native Testing Library; Maestro for E2E flows | Standard for Expo |
@@ -68,6 +69,27 @@ Build with development builds (not Expo Go, because MapLibre and native sign-in 
 **Not adopted from the candidate list** (reasons in [rationale.md](rationale.md)): Mapbox, Leaflet, Dexie, gluestack-ui, Howler/Tone.js, Motion (motion.dev), Amicro, Driver.js.
 
 ## Architecture
+
+### Hosting
+
+Everything runs on free tiers; nothing to self-host.
+
+| Concern | Where | Free-tier limit that matters | Upgrade path |
+|---|---|---|---|
+| Database, Auth, Realtime, Storage, Edge Functions | Supabase Free | Pauses after 1 week without activity; 500 MB DB, 1 GB storage, 200 concurrent realtime connections | A weekly GitHub Actions job that runs the demo reset (real activity, so the project stays awake); Supabase Pro ($25/mo) while actively interviewing if needed |
+| Map tiles | OpenFreeMap | No key, no published quota | Self-host tiles or MapTiler |
+| Geocoding + routing | Geoapify via `geo` Edge Function | 3,000 credits/day, ~5 req/s, attribution required | Paid Geoapify plan; cache frequent lookups in Postgres |
+| SMS OTP | Termii via Send SMS hook | Pay-as-you-go, no free credit; demo numbers bypass SMS | Second provider as failover inside the same hook |
+| Email OTP | Resend SMTP | 100 emails/day, 3,000/month | Resend paid |
+| App builds & OTA | EAS Free | 15 Android + 15 iOS builds, low-priority queue; EAS Update 1,000 MAU | EAS Starter ($19/mo) |
+| Distribution to reviewers | Android: EAS internal-distribution APK link. iOS: TestFlight public link (needs the $99/yr Apple Developer Program) or a simulator build + screen recording | n/a | n/a |
+| CI | GitHub Actions | Free minutes for private repos are limited; unlimited if the repo is public | Make the repo public when it is ready to show |
+
+### SMS
+
+The Send SMS hook (on the Free plan) hands `{ user.phone, sms.otp }` to an Edge Function that verifies the webhook signature, skips sending for demo numbers, and calls the provider. Supabase keeps OTP generation, expiry and rate limits; the hook only delivers. Swapping providers touches one function.
+
+Provider: **Termii**. It is Nigerian, has a DND/transactional route (OTPs reach numbers that opted out of promotions), a sender-ID API and WhatsApp/voice fallbacks. Alternatives and the Sent.dm assessment are in [rationale.md](rationale.md#sms-provider).
 
 ### Project layout
 
@@ -120,13 +142,13 @@ Detailed in the data-model spec (scope feature 3). Foundation-level shape:
 - `profiles` (id = auth.users.id, role `customer|courier`, first/last name, phone, email, avatar_path, locale)
 - `courier_applications` (courier_id, vehicle_type, vehicle_number, licence_number, licence_photo_path, status `pending|approved|rejected`)
 - `addresses` (owner_id, label, line, lat, lng, is_default)
-- `orders` (id, tracking_code unique, customer_id, courier_id null, type, pickup/dropoff snapshot + coords, receiver name/phone, instructions, package size/weight/value/photo_path, handling flags, scheduled_at null, status, price breakdown in millimes, payment_method, created_at)
+- `orders` (id, tracking_code unique, customer_id, courier_id null, type, pickup/dropoff snapshot + coords, receiver name/phone, instructions, package size/weight/value/photo_path, handling flags, scheduled_at null, status, price breakdown in kobo, payment_method, created_at)
 - `order_events` (order_id, status, actor_id, at): the audit trail for every status change
 - `messages` (order_id, sender_id, body, created_at)
-- `wallet_transactions` (owner_id, amount_millimes signed, kind, order_id null, created_at); balance is a view/function over this ledger, never a mutable column
+- `wallet_transactions` (owner_id, amount_kobo signed, kind, order_id null, created_at); balance is a view/function over this ledger, never a mutable column
 - Courier live position is **not** a table write per GPS tick: it goes over a private Realtime Broadcast channel per order, with a throttled `couriers_last_seen` upsert for matching.
 
-Money is stored as integer millimes (1 TND = 1000 millimes) and formatted at the edge as `TND12,50`.
+Money is stored as integer kobo (₦1 = 100 kobo) and formatted only for display, e.g. `₦12,500.00`.
 
 Order status machine: `pending_payment → searching → assigned → at_pickup → picked_up → at_dropoff → delivered`, with `cancelled` reachable before `picked_up` and `failed` from any active state. Only Edge Functions/SQL functions move status, each move writes `order_events`.
 
@@ -139,6 +161,8 @@ Order status machine: `pending_payment → searching → assigned → at_pickup 
 - **Public tracking lookup** by tracking code returns status and ETA only, through a rate-limited function.
 - **Auth abuse**: Supabase OTP rate limits tightened and CAPTCHA on OTP requests to contain SMS cost.
 - **Secrets**: the app only ships the Supabase URL and publishable key (`EXPO_PUBLIC_*` values are public by definition). Service role key and provider secrets live in Edge Function secrets only.
+- **Demo accounts**: reviewer logins use fixed test OTPs that skip SMS (Supabase test OTP mapping, or an allowlist checked in the Send SMS hook). Demo users can only see demo data, and a scheduled job resets it.
+- **Privacy (NDPA 2023)**: collect only what a feature needs, consent at collection, privacy policy linked at sign-up, licence photos and phone numbers never exposed beyond their purpose, and in-app account deletion that removes personal data.
 - **Location privacy**: courier position is shared only with the customer of the active order and only between `assigned` and `delivered`; background location stops when the delivery ends.
 - Run the `secure-me` skill on every feature PR that touches auth, RLS, storage or money.
 
@@ -146,8 +170,8 @@ Order status machine: `pending_payment → searching → assigned → at_pickup 
 - `EXPO_PUBLIC_SUPABASE_URL`: project URL
 - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: client key (public)
 - `EXPO_PUBLIC_MAP_STYLE_LIGHT` / `EXPO_PUBLIC_MAP_STYLE_DARK`: style URLs (default OpenFreeMap positron/dark)
-- `EXPO_PUBLIC_PHOTON_URL`: geocoder base URL
-- `EXPO_PUBLIC_ROUTING_URL`: OSRM-compatible base URL
+- Edge Function secrets (never in the app): `GEOAPIFY_API_KEY`, `TERMII_API_KEY`, `TERMII_SENDER_ID`, `SEND_SMS_HOOK_SECRET`, `DEMO_PHONE_NUMBERS`
+- Supabase Auth SMTP settings: Resend SMTP credentials (dashboard, not env)
 - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`: native Google sign-in
 
 **Critical test scenarios**:
@@ -178,7 +202,7 @@ Tracer Bullet: thin, working thread through every layer first.
 
 **Negative / tradeoffs**:
 - Development builds are required from day one (no Expo Go), so device testing needs an EAS or local build.
-- Public Photon/OSRM instances have fair-use limits; production needs a self-hosted or paid instance.
+- Free tiers have ceilings (Supabase pauses after a week idle, Geoapify 3,000 credits/day, Resend 100 emails/day, EAS low-priority build queue). Fine for a showcase; see *Hosting* for the upgrade path.
 - Supabase is a platform dependency; mitigated because it is plain Postgres underneath.
 
 **Neutral**:
@@ -189,9 +213,8 @@ Tracer Bullet: thin, working thread through every layer first.
 
 - [ ] Confirm font (Urbanist), icon library, and the measured type/spacing/radius values in Figma.
 - [ ] Re-export the 11 design files overwritten during setup (list in `design/README.md`).
-- [ ] Confirm the SMS provider covers Tunisian numbers (Twilio Verify vs MessageBird/Vonage) and cost per OTP.
-- [ ] Choose the production payment provider before launch (Stripe needs a supported merchant entity; Konnect/Flouci are TND-native).
-- [ ] Choose production hosting for geocoding and routing (self-hosted Photon/OSRM vs a provider).
+- [ ] Register a Termii sender ID and confirm DND (transactional) delivery and per-OTP cost; fund a small balance.
+- [ ] Decide the real payment provider (Paystack vs Flutterwave) if the project goes beyond mock payments.
 - [ ] Decide how courier applications are approved (manual in Supabase dashboard for MVP vs an admin tool).
 
 ## Rationale
