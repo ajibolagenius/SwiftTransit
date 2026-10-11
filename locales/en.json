@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "SwiftTransit",
+    "tagline": "Send Anything, Anywhere, Anytime"
+  },
+  "placeholder": {
+    "comingSoon": "This screen is part of {{feature}}.",
+    "design": "Design reference: {{file}}"
+  },
+  "screens": {
+    "onboarding": "Onboarding",
+    "welcome": "Welcome",
+    "phone": "Enter your phone number",
+    "email": "Enter your email address",
+    "verify": "Verify your code",
+    "register": "Tell us about yourself",
+    "courierApply": "Apply as a courier",
+    "home": "Home",
+    "orders": "Orders",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "actionSheet": "What would you like to do?",
+    "newDelivery": "New delivery",
+    "orderSummary": "Order summary",
+    "booked": "Delivery booked",
+    "orderDetail": "Order details",
+    "editProfile": "Edit profile",
+    "addresses": "Saved addresses",
+    "deliveries": "Deliveries",
+    "earnings": "Earnings",
+    "delivery": "Delivery",
+    "chat": "Chat",
+    "locationPermission": "Location access is important"
+  }
+}

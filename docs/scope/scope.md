@@ -33,14 +33,14 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 Decide the stack and scaffold a runnable project so every later slice builds on real structure.
 **Done when:** the stack is recorded in a spec and the scaffold boots on iOS and Android dev builds with theme, fonts, i18n, Supabase client, route shell and a map, and passes CI.
 - [x] Decide the stack (spec): `/architect stack & architecture`
-- [ ] Build it: `/develop stack & architecture`
-   - [ ] Expo SDK 57 scaffold, lint, tests, CI (AC-1, AC-8)
-   - [ ] Tokens → NativeWind, Urbanist, light/dark (AC-2, AC-3)
-   - [ ] i18n, Supabase client with encrypted session, env validation (AC-5, AC-6, AC-9)
-   - [ ] Route tree with role-based gate, MapLibre placeholder (AC-4, AC-7)
+- [x] Build it: `/develop stack & architecture`
+   - [x] Expo SDK 57 scaffold, lint, tests, CI (AC-1, AC-8)
+   - [x] Tokens → NativeWind, Urbanist, light/dark (AC-2, AC-3)
+   - [x] i18n, Supabase client with encrypted session, env validation (AC-5, AC-6, AC-9)
+   - [x] Route tree with role-based gate, MapLibre placeholder (AC-4, AC-7)
 - [ ] Verify it: `/check verify stack & architecture`
 - [ ] Test it: `/test stack & architecture`
-Spec 0001
+Spec 0001 · code in `./` (app/, components/, features/, lib/, theme/)
 
 ### 2. Coding standards & tooling
 Capture conventions from the real scaffold, then enforce them with lint, format and pre-commit hooks.

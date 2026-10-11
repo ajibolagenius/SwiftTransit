@@ -2,7 +2,7 @@
 
 Send Anything, Anywhere, Anytime. An on-demand courier app for Nigeria, on iOS and Android: customers book and track local deliveries, couriers accept and deliver them.
 
-> Status: planning. Docs are in place; the Expo scaffold is the next step (scope feature 1).
+> Status: foundation. The app shell runs (theme, fonts, routing by role, map); features land slice by slice per [the scope](docs/scope/scope.md).
 
 ## Docs
 
@@ -21,7 +21,23 @@ Expo SDK 57 · Expo Router · TypeScript · NativeWind · Reanimated · MapLibre
 
 ## Getting started
 
-Setup commands land with the scaffold. You will need Node 22+, an EAS account or local Xcode/Android Studio (development builds, not Expo Go), and a Supabase project.
+You need Node 22+, and Xcode (iOS) or Android Studio (Android). The app uses native modules (MapLibre), so it runs in a development build, not Expo Go.
+
+```sh
+npm install
+cp .env.example .env        # add your Supabase URL and publishable key
+npm run ios                 # or: npm run android (builds the dev client, then starts Metro)
+```
+
+Without a backend yet, set `EXPO_PUBLIC_DEV_AUTH_STUB=customer` (or `courier`) in `.env` to click through a role's screens in development.
+
+| Command | What it does |
+|---|---|
+| `npm start` | Metro for an installed dev build |
+| `npm run typecheck` | TypeScript, strict |
+| `npm run lint` | ESLint (Expo config + Prettier) |
+| `npm run format` | Prettier write |
+| `npm test` | Jest |
 
 ## Contributing
 
