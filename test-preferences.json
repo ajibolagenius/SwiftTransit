@@ -1,0 +1,9 @@
+{
+  "tool": "jest",
+  "gate": null,
+  "additionalTools": ["@testing-library/react-native", "expo-router/testing-library"],
+  "e2eTool": "none",
+  "testDir": "__tests__",
+  "filePattern": "*.test.ts",
+  "packageManager": "npm"
+}

@@ -39,7 +39,7 @@ Decide the stack and scaffold a runnable project so every later slice builds on 
    - [x] i18n, Supabase client with encrypted session, env validation (AC-5, AC-6, AC-9)
    - [x] Route tree with role-based gate, MapLibre placeholder (AC-4, AC-7)
 - [ ] Verify it: `/check verify stack & architecture`
-- [ ] Test it: `/test stack & architecture`
+- [x] Test it: `/test stack & architecture`
 Spec 0001 · code in `./` (app/, components/, features/, lib/, theme/)
 
 ### 2. Coding standards & tooling

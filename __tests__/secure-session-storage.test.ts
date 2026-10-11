@@ -43,6 +43,30 @@ describe('secureSessionStorage', () => {
     expect(mockSecure.get('sb-auth.key')).not.toBe(first);
   });
 
+  it('returns null when nothing is stored', async () => {
+    expect(await secureSessionStorage.getItem('sb-auth')).toBeNull();
+  });
+
+  // Keychain/Keystore can be wiped (reinstall, restore) while SQLite survives.
+  it('returns null instead of throwing when the key is gone', async () => {
+    await secureSessionStorage.setItem('sb-auth', session);
+    mockSecure.clear();
+    expect(await secureSessionStorage.getItem('sb-auth')).toBeNull();
+  });
+
+  it('keeps separate entries apart', async () => {
+    await secureSessionStorage.setItem('a', 'first');
+    await secureSessionStorage.setItem('b', 'second');
+    expect(await secureSessionStorage.getItem('a')).toBe('first');
+    expect(await secureSessionStorage.getItem('b')).toBe('second');
+  });
+
+  it('round-trips non ASCII text (Nigerian names)', async () => {
+    const value = JSON.stringify({ name: 'Adébáyọ̀ Ọlọ́rúnṣọlá', note: '₦12,500' });
+    await secureSessionStorage.setItem('sb-auth', value);
+    expect(await secureSessionStorage.getItem('sb-auth')).toBe(value);
+  });
+
   it('removes both the ciphertext and the key', async () => {
     await secureSessionStorage.setItem('sb-auth', session);
     await secureSessionStorage.removeItem('sb-auth');
