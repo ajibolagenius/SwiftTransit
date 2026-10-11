@@ -1,6 +1,6 @@
 # AGENTS.md
 
-SwiftTransit: Expo (React Native) courier app for iOS and Android, two roles (customer, courier). Read this before any task.
+SwiftTransit: Expo (React Native) courier app for Nigeria, iOS and Android, two roles (customer, courier). Portfolio project built to production standards. Read this before any task.
 
 ## Context files
 
@@ -18,7 +18,7 @@ SwiftTransit: Expo (React Native) courier app for iOS and Android, two roles (cu
 
 ## Stack (decided in spec 0001)
 
-Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · MapLibre RN + OpenFreeMap + Photon · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider`. Development builds, not Expo Go.
+Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · MapLibre RN + OpenFreeMap + Photon · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider` · Geoapify (via Edge Function) · Termii SMS via Send SMS hook · Resend SMTP. Development builds, not Expo Go.
 
 Commands: to be filled in by `/audit` after the scaffold (feature 2).
 
@@ -26,7 +26,8 @@ Commands: to be filled in by `/audit` after the scaffold (feature 2).
 
 - UI uses semantic tokens from DESIGN.md through NativeWind classes; no raw hex, sizes or radii in components.
 - All copy goes through i18n (`locales/en.json`). Use start/end, never left/right.
-- Money is integer millimes; format only at display.
+- Money is integer kobo; format only at display (`en-NG`, `NGN`). Phone numbers default to `+234`, stored E.164.
+- Use Nigerian content (naira, Lagos addresses, Nigerian names), never the UI kit's Tunisian sample data.
 - Routes in `app/` stay thin; logic lives in `features/<area>/` and `lib/`.
 - Order status and money change only server-side (Edge Functions / SQL functions), never from the client.
 - Every icon-only control has an accessibility label; respect Reduce Motion and font scaling.
