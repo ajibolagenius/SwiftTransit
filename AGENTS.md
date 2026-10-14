@@ -18,9 +18,26 @@ SwiftTransit: Expo (React Native) courier app for Nigeria, iOS and Android, two 
 
 ## Stack (decided in spec 0001)
 
-Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · MapLibre RN + OpenFreeMap + Photon · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider` · Geoapify (via Edge Function) · Termii SMS via Send SMS hook · Resend SMTP. Development builds, not Expo Go.
+Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · MapLibre RN + OpenFreeMap tiles · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider` · Geoapify geocoding and routing (via the `geo` Edge Function) · Termii SMS via Send SMS hook · Resend SMTP. Development builds, not Expo Go.
 
-Commands: to be filled in by `/audit` after the scaffold (feature 2).
+## Build approach
+
+Tracer Bullet: stand up a thin end to end thread through every layer first, then thicken it. Recorded in the scope header.
+
+## Commands
+
+```sh
+npm install
+cp .env.example .env    # then fill Supabase URL and publishable key
+npm run ios             # or npm run android: builds the dev client, then starts Metro
+npm start               # Metro for an installed dev build
+npm run typecheck       # tsc --noEmit
+npm run lint            # expo lint
+npm run format          # prettier --write .
+npm test                # jest (jest-expo preset)
+```
+
+CI (`.github/workflows/ci.yml`) runs typecheck, lint, `format:check` and tests on every PR to `main` and on push to `main`. With no backend yet, set `EXPO_PUBLIC_DEV_AUTH_STUB=customer` (or `courier`) in `.env` to walk a role's screens in development.
 
 ## Conventions
 
@@ -29,6 +46,8 @@ Commands: to be filled in by `/audit` after the scaffold (feature 2).
 - Money is integer kobo; format only at display (`en-NG`, `NGN`). Phone numbers default to `+234`, stored E.164.
 - Use Nigerian content (naira, Lagos addresses, Nigerian names), never the UI kit's Tunisian sample data.
 - Routes in `app/` stay thin; logic lives in `features/<area>/` and `lib/`.
+- TypeScript paths: `@/*` maps to the repo root (`@/lib/env`, `@/features/auth/guards`); `strict` is on.
+- Tests live in `__tests__/` and run on Jest (`jest-expo`). Route tests use `renderRouter` from `expo-router/testing-library` and mock the auth provider, `@/lib/env`, `global.css` and MapLibre.
 - Order status and money change only server-side (Edge Functions / SQL functions), never from the client.
 - Every icon-only control has an accessibility label; respect Reduce Motion and font scaling.
 - Prefer the smallest change that works (ponytail); add a dependency only when it removes real code.
