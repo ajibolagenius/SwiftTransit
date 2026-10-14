@@ -13,7 +13,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 |---|---------|-------|--------|
 | 1 | Stack & architecture | Foundation | in-progress |
 | 2 | Coding standards & tooling | Foundation | planned |
-| 3 | Data model & security | Foundation | planned |
+| 3 | Data model & security | Foundation | done |
 | 4 | Design system & UI primitives | Foundation | planned |
 | 5 | Onboarding & authentication | Slice 1 | planned |
 | 6 | Create a delivery | Slice 1 | planned |
@@ -45,12 +45,22 @@ Spec 0001 · code in `./` (app/, components/, features/, lib/, theme/)
 ### 2. Coding standards & tooling
 Capture conventions from the real scaffold, then enforce them with lint, format and pre-commit hooks.
 **Done when:** root `AGENTS.md` reflects the real stack and commands, and lint/format/typecheck run clean locally and in CI.
-- [ ] Capture conventions + tooling choices: `/audit`
+- [x] Capture conventions + tooling choices: `/audit`
 
-### 3. Data model & security · needs a decision · GA
+### 3. Data model & security · GA · done
 Tables, RLS policies, status machine, wallet ledger, storage buckets and realtime channel policies every feature builds on.
 **Done when:** migrations apply cleanly, RLS denies cross-user access in tests, and generated types are in the app.
-- [ ] Design it (spec): `/architect data model & security`
+- [x] Design it (spec): `/architect data model & security` → [0002](../specs/0002-data-model-security/index.md)
+- [x] Build it: `/develop data model & security`
+   - [x] Toolchain, first policy thread, CI test harness (AC-1, AC-3)
+   - [x] Full schema, RLS matrix, definer functions (AC-1, AC-4, AC-5, AC-6, AC-9, AC-10, AC-11)
+   - [x] Storage and realtime guards, delete-account function (AC-7, AC-9)
+   - [x] Generated types, error copy, seeds, completion tests (AC-2, AC-3, AC-5, AC-8, AC-10)
+- [x] Verify it: `/check verify data model & security`
+- [x] Test it: `/test data model & security`
+- [x] Review it (fresh model): `/check review data model & security`
+- [ ] Document it: `/document data model & security`
+Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
 ### 4. Design system & UI primitives
 Build the primitives in DESIGN.md (Button, IconButton, Input, PhoneInput, OtpInput, SelectCard, Segmented, StepperHeader, Chip, Sheet, TabBar with centre action, OrderCard, BalanceCard) with light/dark, accessibility labels and Reduce Motion.

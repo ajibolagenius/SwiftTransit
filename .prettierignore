@@ -5,3 +5,5 @@ docs/
 *.md
 package-lock.json
 skills-lock.json
+
+supabase/.temp/

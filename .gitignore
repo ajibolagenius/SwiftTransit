@@ -35,3 +35,4 @@ npm-debug.*
 coverage/
 .metro-health-check*
 *.tsbuildinfo
+credentials.md
