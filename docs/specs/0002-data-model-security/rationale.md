@@ -55,7 +55,9 @@ Trust the app, check ownership in queries and hooks.
 
 Option 2 wins because the product's riskiest invariants (privacy across users, money, status integrity) are exactly the ones Postgres can enforce unconditionally, and because spec 0001 already bought Supabase for its realtime and storage; Option 1 would pay for a second enforcement layer that adds latency and maintenance without adding safety beyond Option 2. The known failure mode of Option 2 (policies written wrong) is answered by AC-3 and the CI harness, which is why the test suite is part of this feature, not a follow-up. Option 3 was rejected outright for regulated PII.
 
-Within Option 2, the engineer chose: full schema in one pass (later features write no migrations), one SQL function for the status machine, ledger-only balances with idempotency keys, Broadcast for GPS ticks and Postgres changes for chat and status, seeded `pricing_rules`, dashboard service-role approvals, direct storage uploads with signed reads. Each is recorded in the build spec with its enforcement point.
+Within Option 2, the engineer chose: full schema in one pass (later features write no migrations), one SQL function for the status machine, ledger-only balances with idempotency keys, Broadcast for GPS ticks and Postgres changes for chat and status, seeded `pricing_rules`, dashboard service-role approvals, direct storage uploads with policy-gated reads. Each is recorded in the build spec with its enforcement point.
+
+One divergence resolved: spec 0001's sketch promised demo users see only demo data. This spec's RLS deliberately does not implement that fence (demo rows are ordinary rows); feature 15 (demo mode) owns demo isolation and the weekly reset, building on the `is_demo` column seeded here.
 
 ## References
 
