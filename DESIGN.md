@@ -267,6 +267,7 @@ Mostly white (`neutral-0`) with `neutral-25`/`neutral-50` for quiet cards and tr
 | `bg/inverse` | neutral-950 | neutral-0 |
 | `bg/brand` | green-900 | green-500 |
 | `bg/brand-subtle` | green-200 | dark-brand-subtle |
+| `bg/brand-soft` | green-100 | dark-brand-subtle |
 | `bg/success` | green-500 | green-500 |
 | `text/primary` | neutral-950 | neutral-0 |
 | `text/secondary` | neutral-500 | neutral-175 |
@@ -282,6 +283,8 @@ Mostly white (`neutral-0`) with `neutral-25`/`neutral-50` for quiet cards and tr
 | `border/strong` | neutral-700 | neutral-200 |
 | `border/brand` | green-900 | green-500 |
 | `border/focus` | green-500 | green-500 |
+| `border/danger` | danger | danger |
+| `border/accent` | accent-amber | accent-amber |
 | `interactive/primary` | green-900 | green-500 |
 | `interactive/primary-pressed` | green-700 | green-200 |
 | `interactive/secondary` | green-200 | dark-brand-subtle |

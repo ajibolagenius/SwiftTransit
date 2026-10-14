@@ -1,25 +1,42 @@
-import { Tabs } from 'expo-router';
+import type { LucideIcon } from 'lucide-react-native';
+import { Tabs, useRouter, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { TabBar } from '@/components/ui/tab-bar';
 import type en from '@/locales/en.json';
 import { useThemeColors } from '@/theme/use-theme';
 
 type ScreenKey = keyof (typeof en)['screens'];
 
-// Stock tab bar themed with tokens; the custom bar with the centre action is scope feature 4.
-export function RoleTabs({ tabs }: { tabs: { name: string; title: ScreenKey }[] }) {
+type TabConfig = { name: string; title: ScreenKey; icon: LucideIcon };
+
+// Root tabs with the DESIGN.md custom bar and raised centre action.
+export function RoleTabs({ tabs, fab }: { tabs: TabConfig[]; fab?: { label: ScreenKey; route: string } }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.text.brand,
-        tabBarInactiveTintColor: colors.text.tertiary,
-        tabBarStyle: { backgroundColor: colors.bg.primary, borderTopColor: colors.border.default },
-        tabBarLabelStyle: { fontFamily: 'Urbanist', fontWeight: '500' },
         sceneStyle: { backgroundColor: colors.bg.primary },
       }}
+      tabBar={({ state, navigation }) => (
+        <TabBar
+          items={state.routes.flatMap((route) => {
+            const config = tabs.find((tab) => tab.name === route.name);
+            return config ? [{ key: route.key, label: t(`screens.${config.title}`), icon: config.icon }] : [];
+          })}
+          activeKey={state.routes[state.index]?.key ?? ''}
+          onSelect={(key) => navigation.navigate(key)}
+          fab={
+            fab
+              ? { label: t(`screens.${fab.label}`), onPress: () => router.push(fab.route as Href) }
+              : undefined
+          }
+        />
+      )}
     >
       {tabs.map((tab) => (
         <Tabs.Screen key={tab.name} name={tab.name} options={{ title: t(`screens.${tab.title}`) }} />

@@ -48,6 +48,8 @@ const semanticPairs = {
     'interactive-primary-pressed': ['green-700', 'green-200'],
     'interactive-secondary': ['green-200', 'dark-brand-subtle'],
     'interactive-accent': ['accent-amber', 'accent-amber'],
+    // green-100 surface: selected cards and the stepper header (DESIGN.md select-card-selected, stepper-header).
+    'brand-soft': ['green-100', 'dark-brand-subtle'],
   },
   text: {
     primary: ['neutral-950', 'neutral-0'],
@@ -66,6 +68,8 @@ const semanticPairs = {
     strong: ['neutral-700', 'neutral-200'],
     brand: ['green-900', 'green-500'],
     focus: ['green-500', 'green-500'],
+    danger: ['danger', 'danger'],
+    accent: ['accent-amber', 'accent-amber'],
   },
 } as const satisfies Record<string, Record<string, readonly [PaletteKey, PaletteKey]>>;
 

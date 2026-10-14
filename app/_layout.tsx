@@ -61,6 +61,7 @@ function RootNavigator() {
           name="permission/location"
           options={{ presentation: 'formSheet', sheetAllowedDetents: [0.5], sheetGrabberVisible: true }}
         />
+        {__DEV__ ? <Stack.Screen name="dev/gallery" /> : null}
       </Stack>
     </View>
   );

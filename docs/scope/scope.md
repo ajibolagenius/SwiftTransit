@@ -59,13 +59,21 @@ Tables, RLS policies, status machine, wallet ledger, storage buckets and realtim
 - [x] Verify it: `/check verify data model & security`
 - [x] Test it: `/test data model & security`
 - [x] Review it (fresh model): `/check review data model & security`
-- [ ] Document it: `/document data model & security`
+- [x] Document it: `/document data model & security`
 Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
-### 4. Design system & UI primitives
+### 4. Design system & UI primitives · in-progress
 Build the primitives in DESIGN.md (Button, IconButton, Input, PhoneInput, OtpInput, SelectCard, Segmented, StepperHeader, Chip, Sheet, TabBar with centre action, OrderCard, BalanceCard) with light/dark, accessibility labels and Reduce Motion.
 **Done when:** every primitive renders in both themes on a dev-only gallery screen, meets 44 pt targets, and passes an `impeccable audit`.
-- [ ] Build it: `/develop design system & UI primitives`
+- [x] Build it: `/develop design system & UI primitives`
+   - [x] Token coverage extended (bg/brand-soft, border/danger, border/accent) + `cn` helper
+   - [x] 13 primitives in `components/ui` (light/dark, a11y labels, Reduce Motion, 44 pt+ targets)
+   - [x] RoleTabs rewired to the custom TabBar, centre action on customer tabs
+   - [x] Dev gallery at `/dev/gallery` with route registration and i18n copy
+   - [x] Reanimated jest mock; typecheck, lint, 69 tests, format all green
+- [ ] Verify it: `/check verify design system & UI primitives`
+- [ ] Test it: `/test design system & UI primitives`
+code in `components/ui`, `components/role-tabs.tsx`, `app/dev/gallery.tsx`, `theme/tokens.ts`
 
 ## Slice 1: Customer can book and see a delivery
 
