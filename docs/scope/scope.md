@@ -59,7 +59,7 @@ Tables, RLS policies, status machine, wallet ledger, storage buckets and realtim
 - [x] Verify it: `/check verify data model & security`
 - [x] Test it: `/test data model & security`
 - [x] Review it (fresh model): `/check review data model & security`
-- [ ] Document it: `/document data model & security`
+- [x] Document it: `/document data model & security`
 Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
 ### 4. Design system & UI primitives
