@@ -53,7 +53,6 @@ export const OtpInput = forwardRef<
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           autoComplete="sms-otp"
-          autoFocus
           selectionColor="transparent"
           caretHidden
           maxLength={OTP_LENGTH}
