@@ -58,7 +58,7 @@ Tables, RLS policies, status machine, wallet ledger, storage buckets and realtim
    - [x] Generated types, error copy, seeds, completion tests (AC-2, AC-3, AC-5, AC-8, AC-10)
 - [x] Verify it: `/check verify data model & security`
 - [x] Test it: `/test data model & security`
-- [ ] Review it (fresh model): `/check review data model & security`
+- [x] Review it (fresh model): `/check review data model & security`
 - [ ] Document it: `/document data model & security`
 Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
