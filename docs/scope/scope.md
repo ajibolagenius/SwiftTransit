@@ -51,16 +51,16 @@ Capture conventions from the real scaffold, then enforce them with lint, format 
 Tables, RLS policies, status machine, wallet ledger, storage buckets and realtime channel policies every feature builds on.
 **Done when:** migrations apply cleanly, RLS denies cross-user access in tests, and generated types are in the app.
 - [x] Design it (spec): `/architect data model & security` → [0002](../specs/0002-data-model-security/index.md)
-- [ ] Build it: `/develop data model & security`
-   - [ ] Toolchain, first policy thread, CI test harness (AC-1, AC-3)
-   - [ ] Full schema, RLS matrix, definer functions (AC-1, AC-4, AC-5, AC-6, AC-9, AC-10, AC-11)
-   - [ ] Storage and realtime guards, delete-account function (AC-7, AC-9)
-   - [ ] Generated types, error copy, seeds, completion tests (AC-2, AC-3, AC-5, AC-8, AC-10)
+- [x] Build it: `/develop data model & security`
+   - [x] Toolchain, first policy thread, CI test harness (AC-1, AC-3)
+   - [x] Full schema, RLS matrix, definer functions (AC-1, AC-4, AC-5, AC-6, AC-9, AC-10, AC-11)
+   - [x] Storage and realtime guards, delete-account function (AC-7, AC-9)
+   - [x] Generated types, error copy, seeds, completion tests (AC-2, AC-3, AC-5, AC-8, AC-10)
 - [ ] Verify it: `/check verify data model & security`
 - [ ] Test it: `/test data model & security`
 - [ ] Review it (fresh model): `/check review data model & security`
 - [ ] Document it: `/document data model & security`
-Spec [0002](../specs/0002-data-model-security/index.md)
+Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
 ### 4. Design system & UI primitives
 Build the primitives in DESIGN.md (Button, IconButton, Input, PhoneInput, OtpInput, SelectCard, Segmented, StepperHeader, Chip, Sheet, TabBar with centre action, OrderCard, BalanceCard) with light/dark, accessibility labels and Reduce Motion.

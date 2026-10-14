@@ -4,16 +4,21 @@ import { createClient } from '@supabase/supabase-js';
 import { AppState } from 'react-native';
 
 import { env } from '@/lib/env';
+import type { Database } from '@/lib/supabase/types';
 import { secureSessionStorage } from '@/lib/secure-session-storage';
 
-export const supabase = createClient(env.EXPO_PUBLIC_SUPABASE_URL, env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: secureSessionStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+export const supabase = createClient<Database>(
+  env.EXPO_PUBLIC_SUPABASE_URL,
+  env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      storage: secureSessionStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
   },
-});
+);
 
 // Refresh tokens only while the app is in the foreground.
 AppState.addEventListener('change', (state) => {

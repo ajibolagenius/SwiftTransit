@@ -29,3 +29,18 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm test -- --ci
+
+  # Spec 0002 task 3 (AC-3): the RLS policy suite runs against a real
+  # Postgres with auth and storage, so a PR cannot merge with a broken policy.
+  policy-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.113.0
+      - name: Start local database (migrations + seed applied)
+        run: supabase db start
+      - name: Policy test suite
+        run: bash supabase/.test/run.sh

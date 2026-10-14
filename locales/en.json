@@ -31,5 +31,29 @@
     "delivery": "Delivery",
     "chat": "Chat",
     "locationPermission": "Location access is important"
+  },
+  "errors": {
+    "swifttransit.order.not_found": "We could not find that order.",
+    "swifttransit.order.not_owner": "You can only change your own orders.",
+    "swifttransit.order.forbidden": "You do not have access to this order.",
+    "swifttransit.order.already_assigned": "Someone else took this job. Try the next one.",
+    "swifttransit.order.invalid_transition": "That status change is not allowed right now.",
+    "swifttransit.order.status_direct_write": "Order status can only change through the app's official steps.",
+    "swifttransit.order.system_only": "Only the system can set that status.",
+    "swifttransit.order.tracking_exhausted": "We could not create a tracking code. Please try again.",
+    "swifttransit.order.idempotency_required": "This booking is missing its retry key. Please try again.",
+    "swifttransit.payment.reference_required": "The payment did not complete. Please pay again.",
+    "swifttransit.wallet.insufficient_balance": "Your wallet balance is too low. Top up to continue.",
+    "swifttransit.profile.already_exists": "Your profile is already set up.",
+    "swifttransit.profile.name_required": "Please enter your first and last name.",
+    "swifttransit.profile.column_locked": "Some profile details can only be changed by SwiftTransit.",
+    "swifttransit.application.decision_locked": "Application decisions are made by SwiftTransit.",
+    "swifttransit.courier.not_approved": "Only approved couriers can do this. Complete your application first.",
+    "swifttransit.courier.state_locked": "Online status and live jobs are managed by the app.",
+    "swifttransit.courier.location_throttled": "You shared your location just now. Please wait a few seconds.",
+    "swifttransit.auth.no_session": "Please sign in again.",
+    "swifttransit.auth.invalid_session": "Your session is no longer valid. Please sign in again.",
+    "swifttransit.storage.delete_failed": "We could not remove your files. Please try again.",
+    "swifttransit.account.delete_failed": "We could not delete your account. Please try again."
   }
 }
