@@ -256,12 +256,15 @@ begin
     raise exception 'swifttransit.order.not_found' using errcode = 'P0001';
   end if;
 
+  -- Ownership first: a stranger gets not_owner whatever the status is, so a
+  -- replay never returns another customer's row (receiver phone and addresses).
+  if o.customer_id <> uid then
+    raise exception 'swifttransit.order.not_owner' using errcode = 'P0001';
+  end if;
+
   -- Replay: a paid order returns the original outcome, nothing is written twice.
   if o.status <> 'pending_payment' then
     return o;
-  end if;
-  if o.customer_id <> uid then
-    raise exception 'swifttransit.order.not_owner' using errcode = 'P0001';
   end if;
 
   perform public._set_tx_key(idempotency_key);
@@ -365,6 +368,13 @@ begin
     end if;
     actor := uid;
   elsif new_status = 'failed' then
+    -- Client path: only a participant may fail the order. A null uid got here
+    -- from the top check (service role only for failed), so it skips this.
+    if uid is not null
+       and uid is distinct from o.customer_id
+       and uid is distinct from o.courier_id then
+      raise exception 'swifttransit.order.forbidden' using errcode = 'P0001';
+    end if;
     actor := uid; -- null actor means the service role path
   else
     if uid is distinct from o.courier_id then
