@@ -45,7 +45,7 @@ Spec 0001 · code in `./` (app/, components/, features/, lib/, theme/)
 ### 2. Coding standards & tooling
 Capture conventions from the real scaffold, then enforce them with lint, format and pre-commit hooks.
 **Done when:** root `AGENTS.md` reflects the real stack and commands, and lint/format/typecheck run clean locally and in CI.
-- [ ] Capture conventions + tooling choices: `/audit`
+- [x] Capture conventions + tooling choices: `/audit`
 
 ### 3. Data model & security · needs a decision · GA
 Tables, RLS policies, status machine, wallet ledger, storage buckets and realtime channel policies every feature builds on.
