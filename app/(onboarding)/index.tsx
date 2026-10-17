@@ -21,6 +21,7 @@ export default function OnboardingScreen() {
   const { markOnboardingSeen } = useAuth();
   const listRef = useRef<FlatList<(typeof SLIDES)[number]>>(null);
   const [index, setIndex] = useState(0);
+  const [slideWidth, setSlideWidth] = useState(0);
   const last = index === SLIDES.length - 1;
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -44,7 +45,11 @@ export default function OnboardingScreen() {
   return (
     <View className="flex-1 bg-primary">
       <View className="items-center gap-2 pt-11">
-        <Image source={require('../../assets/splash-icon.png')} className="h-14 w-14" resizeMode="contain" />
+        <Image
+          source={require('../../assets/splash-icon.png')}
+          style={{ width: 56, height: 56 }}
+          resizeMode="contain"
+        />
         <Text className="font-sans text-h4 text-brand">{t('app.name')}</Text>
       </View>
 
@@ -55,31 +60,34 @@ export default function OnboardingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        onLayout={(e) => setSlideWidth(e.nativeEvent.layout.width)}
         onMomentumScrollEnd={onScroll}
         renderItem={({ item, index: i }) => (
-          <View className="flex-1 items-center gap-7 px-11 pt-11" style={{ width: '100%' }}>
-            <View className="h-44 w-full items-center justify-center rounded-3xl bg-brand-soft">
-              <IconTile icon={item.icon} size={88} />
-            </View>
-            <View className="items-center gap-3">
-              <Text accessibilityRole="header" className="text-center font-sans text-h1 text-primary">
-                {t(`onboarding.${item.title}`)}
-              </Text>
-              <Text className="text-center font-sans text-body-lg text-secondary">
-                {t(`onboarding.${item.body}`)}
-              </Text>
-            </View>
-            <View
-              className="mt-auto flex-row gap-2 pb-9"
-              accessibilityElementsHidden
-              importantForAccessibility="no"
-            >
-              {SLIDES.map((_, d) => (
-                <View
-                  key={d}
-                  className={d === i ? 'h-2 w-6 rounded-full bg-brand' : 'h-2 w-2 rounded-full bg-tertiary'}
-                />
-              ))}
+          <View style={{ width: slideWidth || undefined }} className="flex-1">
+            <View className="flex-1 items-center gap-7 px-11 pt-11">
+              <View className="w-full items-center justify-center rounded-3xl bg-brand-soft" style={{ height: 176 }}>
+                <IconTile icon={item.icon} size={88} />
+              </View>
+              <View className="items-center gap-3">
+                <Text accessibilityRole="header" className="text-center font-sans text-h1 text-primary">
+                  {t(`onboarding.${item.title}`)}
+                </Text>
+                <Text className="text-center font-sans text-body-lg text-secondary">
+                  {t(`onboarding.${item.body}`)}
+                </Text>
+              </View>
+              <View
+                className="mt-auto flex-row gap-2 pb-9"
+                accessibilityElementsHidden
+                importantForAccessibility="no"
+              >
+                {SLIDES.map((_, d) => (
+                  <View
+                    key={d}
+                    className={d === i ? 'h-2 w-6 rounded-full bg-brand' : 'h-2 w-2 rounded-full bg-tertiary'}
+                  />
+                ))}
+              </View>
             </View>
           </View>
         )}

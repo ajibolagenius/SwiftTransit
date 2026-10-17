@@ -72,7 +72,8 @@ export default function Screen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-8 px-7 pb-40 pt-3"
+        contentContainerClassName="gap-8 px-7 pt-3"
+        contentContainerStyle={{ paddingBottom: 160 }}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2 rounded-2xl bg-secondary p-7">
