@@ -7,6 +7,7 @@ export async function probeReachable(): Promise<boolean> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(`${env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/health`, {
+      headers: { apikey: env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY },
       signal: controller.signal,
     });
     clearTimeout(timer);

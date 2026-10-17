@@ -5,7 +5,8 @@ import { secureSessionStorage } from '@/lib/secure-session-storage';
 // sign out, AC-8). Supabase keys the session as `sb-<project-ref>-auth-token`.
 export async function hasStoredSession(): Promise<boolean> {
   try {
-    const key = `sb-${env.EXPO_PUBLIC_SUPABASE_URL.replace(/^https?:\/\//, '')}-auth-token`;
+    const ref = env.EXPO_PUBLIC_SUPABASE_URL.replace(/^https?:\/\//, '').split('.')[0];
+    const key = `sb-${ref}-auth-token`;
     return (await secureSessionStorage.getItem(key)) !== null;
   } catch {
     return false;

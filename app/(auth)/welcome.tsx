@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
         <View className="items-center gap-2">
           <Image
             source={require('../../assets/splash-icon.png')}
-            className="h-16 w-16"
+            style={{ width: 64, height: 64 }}
             resizeMode="contain"
           />
           <Text accessibilityRole="header" className="text-center font-sans text-h1 text-primary">

@@ -89,9 +89,9 @@ Onboarding carousel, welcome screen, phone and email OTP, Google and Apple sign-
    - [x] Failure states: offline, expired session, rate limit, failed profile read (AC-8, AC-9, AC-10)
    - [x] i18n, themes, accessibility, legal links, tests, dev stub intact (AC-13, AC-14)
 - [ ] Verify it: `/check verify onboarding & authentication`
-- [ ] Test it: `/test onboarding & authentication`
-- [ ] Review it (fresh model): `/check review onboarding & authentication`
-- [ ] Document it: `/document onboarding & authentication`
+- [x] Test it: `/test onboarding & authentication`
+- [x] Review it (fresh model): `/check review onboarding & authentication`
+- [x] Document it: `/document onboarding & authentication`
 Spec [0003](../specs/0003-onboarding-authentication.md) · code in `features/auth/`, `app/(auth)/`, `app/(onboarding)/`, `app/auth/callback.tsx`, `supabase/functions/send-sms/`
 
 ### 6. Create a delivery · needs a decision
