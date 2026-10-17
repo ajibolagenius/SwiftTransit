@@ -759,7 +759,6 @@ export type Database = {
           flags: Database['public']['Enums']['handling_flag'][];
           pickup_lat: number;
           pickup_lng: number;
-          route_km: number;
           size: Database['public']['Enums']['package_size'];
         };
         Returns: Json;
@@ -788,6 +787,15 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      route_km: {
+        Args: {
+          dropoff_lat: number;
+          dropoff_lng: number;
+          pickup_lat: number;
+          pickup_lng: number;
+        };
+        Returns: number;
       };
       set_online: { Args: { online: boolean }; Returns: undefined };
       update_courier_location: {

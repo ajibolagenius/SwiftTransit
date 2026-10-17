@@ -98,17 +98,17 @@ Spec [0003](../specs/0003-onboarding-authentication.md) · code in `features/aut
 The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step wizard (type, pickup, drop-off, receiver, package, schedule), order summary with price breakdown, mock payment, booking confirmation with tracking number.
 **Done when:** a customer completes the wizard using map pick, address search or saved address, sees the price before paying, pays with the mock card or wallet, and gets a tracking number; the order exists in the database as `searching`.
 - [x] Design it (spec): `/architect create a delivery` → [0005](../specs/0005-create-a-delivery.md)
-- [ ] Build it: `/develop create a delivery`
-   - [ ] Deps, the price rule in SQL, and the first priced summary (AC-9, AC-10, AC-22, AC-23)
-   - [ ] Geo function, search hook, wizard shell and step guard (AC-4, AC-8, AC-14, AC-19)
-   - [ ] The six steps: type, locations, receiver, package, schedule (AC-2, AC-3, AC-5, AC-6, AC-7)
-   - [ ] Summary, mock payment, submit flow, confirmation and saved address (AC-11, AC-12, AC-13, AC-15, AC-16, AC-18)
-   - [ ] Entry points, session and expiry handling, i18n, accessibility, tests (AC-1, AC-17, AC-20, AC-21, AC-22, AC-23)
+- [x] Build it: `/develop create a delivery`
+   - [x] Deps, the price rule in SQL, and the first priced summary (AC-9, AC-10, AC-22, AC-23)
+   - [x] Geo function, search hook, wizard shell and step guard (AC-4, AC-8, AC-14, AC-19)
+   - [x] The six steps: type, locations, receiver, package, schedule (AC-2, AC-3, AC-5, AC-6, AC-7)
+   - [x] Summary, mock payment, submit flow, confirmation and saved address (AC-11, AC-12, AC-13, AC-15, AC-16, AC-18)
+   - [x] Entry points, session and expiry handling, i18n, accessibility, tests (AC-1, AC-17, AC-20, AC-21, AC-22, AC-23)
 - [ ] Verify it: `/check verify create a delivery`
 - [ ] Test it: `/test create a delivery`
 - [ ] Review it (fresh model): `/check review create a delivery`
 - [ ] Document it: `/document create a delivery`
-Spec [0005](../specs/0005-create-a-delivery.md)
+Spec [0005](../specs/0005-create-a-delivery.md) · code in `features/deliveries/`, `app/(customer)/new-delivery/`, `lib/` (geo, money, payments, query, error-label), `supabase/` (migrations, `.test`, `functions/geo`), `locales/en.json`
 
 ### 7. Orders list & order detail
 Orders tab with all / active / past filters, tracking-number search, home "Active deliveries", order detail with status timeline.

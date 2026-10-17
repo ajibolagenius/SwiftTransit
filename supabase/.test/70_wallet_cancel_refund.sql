@@ -15,13 +15,13 @@ select public.create_order(
   '{"type":"food","package_size":"small","weight_kg":1,"payment_method":"wallet",
     "pickup_line":"Yaba","pickup_lat":6.5092,"pickup_lng":3.3777,
     "dropoff_line":"Ikeja","dropoff_lat":6.6018,"dropoff_lng":3.3515,
-    "receiver_name":"Sola","receiver_phone":"+2348018888888","route_km":2}'::jsonb,
+    "receiver_name":"Sola","receiver_phone":"+2348018888888"}'::jsonb,
   'canc-2');
 select public.pay_order(
   (select id from public.orders where idempotency_key = 'canc-2'), 'canc-2-pay', 'mock_c2');
 
 -- Balance counts topup/payout/refund only; the booking debit never moves it.
--- small, 2 km: 150000 + ceil(2 * 5000) = 160000.
+-- small, derived 14.98 km: 150000 + ceil(14.98 * 5000) = 224900 refunded.
 select _test.expect_eq('balance ignores booking rows',
   (select public.wallet_balance()), 1000000);
 
@@ -36,7 +36,7 @@ set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-0000000000c1","r
 select public.change_order_status(
   (select id from public.orders where idempotency_key = 'canc-2'), 'cancelled');
 select _test.expect_eq('refund credited once',
-  (select public.wallet_balance()), 1160000);
+  (select public.wallet_balance()), 1224900);
 set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-0000000000c3","role":"authenticated"}';
 select _test.expect_true('courier released',
   (select current_order_id is null from public.couriers_status

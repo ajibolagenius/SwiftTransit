@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ComponentType, ReactNode } from 'react';
+import { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Fixed window metrics so insets are deterministic in Jest (no native safe area bridge).
@@ -8,7 +10,19 @@ const initialMetrics = {
 };
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <SafeAreaProvider initialMetrics={initialMetrics}>{children}</SafeAreaProvider>;
+  // One client per mounted tree, so a cache never leaks between tests.
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      }),
+  );
+
+  return (
+    <SafeAreaProvider initialMetrics={initialMetrics}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }
 
 export const wrapper: ComponentType<{ children: ReactNode }> = Providers;
