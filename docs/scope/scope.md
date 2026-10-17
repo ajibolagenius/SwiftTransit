@@ -16,7 +16,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 3 | Data model & security | Foundation | done |
 | 4 | Design system & UI primitives | Foundation | done |
 | 5 | Onboarding & authentication | Slice 1 | in-progress |
-| 6 | Create a delivery | Slice 1 | planned |
+| 6 | Create a delivery | Slice 1 | in-progress |
 | 7 | Orders list & order detail | Slice 1 | planned |
 | 8 | Courier application & go online | Slice 2 | planned |
 | 9 | Delivery requests & lifecycle | Slice 2 | planned |
@@ -94,10 +94,21 @@ Onboarding carousel, welcome screen, phone and email OTP, Google and Apple sign-
 - [x] Document it: `/document onboarding & authentication`
 Spec [0003](../specs/0003-onboarding-authentication.md) · code in `features/auth/`, `app/(auth)/`, `app/(onboarding)/`, `app/auth/callback.tsx`, `supabase/functions/send-sms/`
 
-### 6. Create a delivery · needs a decision
+### 6. Create a delivery · in-progress · GA
 The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step wizard (type, pickup, drop-off, receiver, package, schedule), order summary with price breakdown, mock payment, booking confirmation with tracking number.
 **Done when:** a customer completes the wizard using map pick, address search or saved address, sees the price before paying, pays with the mock card or wallet, and gets a tracking number; the order exists in the database as `searching`.
-- [ ] Design it (spec): `/architect create a delivery`
+- [x] Design it (spec): `/architect create a delivery` → [0005](../specs/0005-create-a-delivery.md)
+- [ ] Build it: `/develop create a delivery`
+   - [ ] Deps, the price rule in SQL, and the first priced summary (AC-9, AC-10, AC-22, AC-23)
+   - [ ] Geo function, search hook, wizard shell and step guard (AC-4, AC-8, AC-14, AC-19)
+   - [ ] The six steps: type, locations, receiver, package, schedule (AC-2, AC-3, AC-5, AC-6, AC-7)
+   - [ ] Summary, mock payment, submit flow, confirmation and saved address (AC-11, AC-12, AC-13, AC-15, AC-16, AC-18)
+   - [ ] Entry points, session and expiry handling, i18n, accessibility, tests (AC-1, AC-17, AC-20, AC-21, AC-22, AC-23)
+- [ ] Verify it: `/check verify create a delivery`
+- [ ] Test it: `/test create a delivery`
+- [ ] Review it (fresh model): `/check review create a delivery`
+- [ ] Document it: `/document create a delivery`
+Spec [0005](../specs/0005-create-a-delivery.md)
 
 ### 7. Orders list & order detail
 Orders tab with all / active / past filters, tracking-number search, home "Active deliveries", order detail with status timeline.
