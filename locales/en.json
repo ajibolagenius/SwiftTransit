@@ -100,6 +100,112 @@
     "locationPermission": "Location access is important",
     "gallery": "Design gallery"
   },
+  "onboarding": {
+    "deliverAnything": "Deliver Anything. Anytime",
+    "deliverAnythingBody": "Book fast and reliable parcel deliveries in seconds. Track your orders live and stay in control from pickup to drop-off.",
+    "createDelivery": "Create a Delivery in Seconds",
+    "createDeliveryBody": "Enter pickup and drop-off details, choose your delivery option, and confirm — it's that simple.",
+    "trackEveryStep": "Track Every Step",
+    "trackEveryStepBody": "Watch your courier move in real time and know the exact moment it arrives.",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "jumpToSignIn": "Jump to Sign in"
+  },
+  "auth": {
+    "back": "Go back",
+    "continue": "Continue",
+    "offline": "You appear to be offline. Check your connection and try again.",
+    "phone": {
+      "title": "Enter Your Phone Number",
+      "subtitle": "We'll send you a verification code",
+      "label": "Phone number",
+      "placeholder": "802 123 4567",
+      "helper": "Your number will be used for login verification and courier communication",
+      "invalidNumber": "Please enter a valid Nigerian phone number",
+      "sendFailed": "We couldn't send the code. Please try again."
+    },
+    "verify": {
+      "titlePhone": "Verify Your Phone Number",
+      "titleEmail": "Verify Your Email Address",
+      "subtitlePhone": "Enter the 6-digit code sent to {{number}}",
+      "subtitleEmail": "Enter the 6-digit code sent to {{email}}",
+      "codeLabel": "Verification code",
+      "submit": "Verify & Continue",
+      "notReceived": "Didn't receive the code?",
+      "resendNow": "Resend code",
+      "resendIn": "Resend code in {{time}}",
+      "useEmail": "SMS not arriving? Use email instead",
+      "invalid": "Invalid verification code. Please try again.",
+      "expired": "That code has expired. Please request a new one.",
+      "rateLimited": "Too many attempts. Please try again later."
+    },
+    "email": {
+      "title": "Enter Your Email Address",
+      "subtitle": "We'll send you a verification code",
+      "label": "Email address",
+      "placeholder": "your_email@example.com",
+      "helper": "We'll send a 6-digit code to this address",
+      "invalid": "Please enter a valid email address",
+      "sendFailed": "We couldn't send the code. Please try again.",
+      "smsEscapeNotice": "The SMS didn't arrive? Sign in with your email address instead."
+    },
+    "register": {
+      "title": "Tell Us About Yourself",
+      "subtitle": "We need a few details to complete your registration",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "your first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "your last name",
+      "email": "Email address",
+      "emailOptional": "Email address (Optional)",
+      "emailPlaceholder": "your_email@example.com",
+      "emailTaken": "That email is already in use by another account.",
+      "accountType": "Account type",
+      "courier": "Courier",
+      "courierHint": "Work as a Courier",
+      "client": "Client",
+      "clientHint": "Request Delivery Services",
+      "submit": "Create Account",
+      "failed": "We couldn't create your account. Please try again.",
+      "termsPrefix": "By continuing you agree to our",
+      "termsAnd": "and",
+      "nameRequired": "Please enter your first and last name."
+    },
+    "welcome": {
+      "title": "Welcome to SwiftTransit",
+      "subtitle": "Send anything, anywhere, anytime",
+      "sessionExpired": "Your session expired. Please sign in again.",
+      "phone": "Continue with Phone",
+      "email": "Continue with Email",
+      "google": "Continue with Google",
+      "apple": "Continue with Apple",
+      "oauthFailed": "Sign-in was cancelled or failed. Please try again.",
+      "finishing": "Finishing sign in…",
+      "termsPrefix": "By continuing you agree to our",
+      "termsAnd": "and"
+    },
+    "profileError": {
+      "title": "We couldn't load your profile",
+      "body": "This looks like a connection problem. Your account is safe.",
+      "retry": "Try again",
+      "signOut": "Sign out"
+    }
+  },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "stub": "This is a placeholder. The full legal text will be published before launch. SwiftTransit is a portfolio demonstration app."
+  },
+  "permission": {
+    "location": {
+      "title": "Location access is important",
+      "body": "SwiftTransit uses your location to show couriers and routes near you. You can still book deliveries without it.",
+      "denied": "Location is off. You can turn it on in your device settings to see couriers near you.",
+      "allow": "Allow location access",
+      "later": "Ask me later",
+      "openSettings": "Open settings"
+    }
+  },
   "errors": {
     "swifttransit.order.not_found": "We could not find that order.",
     "swifttransit.order.not_owner": "You can only change your own orders.",

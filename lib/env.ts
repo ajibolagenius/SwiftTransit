@@ -6,6 +6,8 @@ const schema = z.object({
   EXPO_PUBLIC_MAP_STYLE_LIGHT: z.url().default('https://tiles.openfreemap.org/styles/positron'),
   EXPO_PUBLIC_MAP_STYLE_DARK: z.url().default('https://tiles.openfreemap.org/styles/dark'),
   EXPO_PUBLIC_DEV_AUTH_STUB: z.enum(['customer', 'courier']).optional(),
+  EXPO_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
+  EXPO_PUBLIC_APPLE_CLIENT_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof schema>;
@@ -26,4 +28,6 @@ export const env = parseEnv({
   EXPO_PUBLIC_MAP_STYLE_LIGHT: process.env.EXPO_PUBLIC_MAP_STYLE_LIGHT || undefined,
   EXPO_PUBLIC_MAP_STYLE_DARK: process.env.EXPO_PUBLIC_MAP_STYLE_DARK || undefined,
   EXPO_PUBLIC_DEV_AUTH_STUB: process.env.EXPO_PUBLIC_DEV_AUTH_STUB || undefined,
+  EXPO_PUBLIC_GOOGLE_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || undefined,
+  EXPO_PUBLIC_APPLE_CLIENT_ID: process.env.EXPO_PUBLIC_APPLE_CLIENT_ID || undefined,
 });

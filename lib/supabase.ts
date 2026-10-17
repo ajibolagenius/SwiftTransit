@@ -16,6 +16,9 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
+      // PKCE stores the code verifier in the encrypted session storage; OAuth and
+      // email link exchange read it back via exchangeCodeForSession.
+      flowType: 'pkce',
     },
   },
 );
