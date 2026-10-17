@@ -24,7 +24,7 @@ export const OtpInput = forwardRef<
     <View className="gap-2">
       <Text className="font-sans text-label-md text-secondary">{label}</Text>
       <View className="h-12 flex-row items-stretch gap-2">
-        {/* Decorative boxes: the single invisible input below owns typing, paste and autofill. */}
+        {/* Decorative boxes only, never the source of truth for the value. */}
         <View
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
@@ -40,6 +40,9 @@ export const OtpInput = forwardRef<
             />
           ))}
         </View>
+        {/* Typing, paste and autofill live here. It is hidden through the text color rather than
+            opacity: iOS drops a view under 0.01 alpha from hit testing and from the accessibility
+            tree, so an opacity 0 field can be neither tapped nor read. */}
         <RNTextInput
           ref={ref}
           accessibilityLabel={label}
@@ -49,7 +52,7 @@ export const OtpInput = forwardRef<
             onChange(next);
             if (next.length === OTP_LENGTH) onComplete?.(next);
           }}
-          className="absolute inset-0 opacity-0"
+          className="absolute inset-0 text-transparent"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           autoComplete="sms-otp"
