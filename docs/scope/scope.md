@@ -15,7 +15,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 2 | Coding standards & tooling | Foundation | planned |
 | 3 | Data model & security | Foundation | done |
 | 4 | Design system & UI primitives | Foundation | done |
-| 5 | Onboarding & authentication | Slice 1 | planned |
+| 5 | Onboarding & authentication | Slice 1 | in-progress |
 | 6 | Create a delivery | Slice 1 | planned |
 | 7 | Orders list & order detail | Slice 1 | planned |
 | 8 | Courier application & go online | Slice 2 | planned |
@@ -78,10 +78,21 @@ code in `components/ui`, `components/role-tabs.tsx`, `app/dev/gallery.tsx`, `the
 
 ## Slice 1: Customer can book and see a delivery
 
-### 5. Onboarding & authentication · needs a decision · GA
+### 5. Onboarding & authentication · in-progress · GA
 Onboarding carousel, welcome screen, phone and email OTP, Google and Apple sign-in, registration with account type, location permission sheet.
 **Done when:** a new user can sign up with any of the four methods, verify OTP (with invalid-code and resend timer states), choose customer or courier, and lands in the right tabs; a returning user skips onboarding.
-- [ ] Design it (spec): `/architect onboarding & authentication`
+- [x] Design it (spec): `/architect onboarding & authentication` → [0003](../specs/0003-onboarding-authentication.md)
+- [x] Build it: `/develop onboarding & authentication`
+   - [x] Deps and the phone OTP tracer thread (AC-2, AC-5, AC-6, AC-7)
+   - [x] Dashboard configuration and the send-sms Edge Function (AC-2, AC-4)
+   - [x] Carousel with the once-per-install gate, email path, Google and Apple OAuth, location sheet (AC-1, AC-3, AC-4, AC-7, AC-11, AC-12)
+   - [x] Failure states: offline, expired session, rate limit, failed profile read (AC-8, AC-9, AC-10)
+   - [x] i18n, themes, accessibility, legal links, tests, dev stub intact (AC-13, AC-14)
+- [ ] Verify it: `/check verify onboarding & authentication`
+- [ ] Test it: `/test onboarding & authentication`
+- [ ] Review it (fresh model): `/check review onboarding & authentication`
+- [ ] Document it: `/document onboarding & authentication`
+Spec [0003](../specs/0003-onboarding-authentication.md) · code in `features/auth/`, `app/(auth)/`, `app/(onboarding)/`, `app/auth/callback.tsx`, `supabase/functions/send-sms/`
 
 ### 6. Create a delivery · needs a decision
 The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step wizard (type, pickup, drop-off, receiver, package, schedule), order summary with price breakdown, mock payment, booking confirmation with tracking number.

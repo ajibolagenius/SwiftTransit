@@ -17,6 +17,11 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
+  extra: {
+    // Supabase OAuth app credentials (public by nature; the secrets live server-side).
+    googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? '',
+    appleClientId: process.env.EXPO_PUBLIC_APPLE_CLIENT_ID ?? '',
+  },
   ios: {
     bundleIdentifier: 'com.ajibolagenius.swifttransit',
     supportsTablet: false,
@@ -63,6 +68,16 @@ const config: ExpoConfig = {
     'expo-localization',
     'expo-secure-store',
     'expo-sqlite',
+    'expo-web-browser',
+    [
+      'expo-location',
+      {
+        locationWhenInUseUsageDescription:
+          'SwiftTransit uses your location to show couriers and routes near you. You can still book deliveries without it.',
+        locationAlwaysAndWhenInUseUsageDescription:
+          'SwiftTransit uses your location to show couriers and routes near you. You can still book deliveries without it.',
+      },
+    ],
     '@maplibre/maplibre-react-native',
   ],
   experiments: { typedRoutes: true },
