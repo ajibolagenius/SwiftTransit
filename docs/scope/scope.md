@@ -14,7 +14,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 1 | Stack & architecture | Foundation | in-progress |
 | 2 | Coding standards & tooling | Foundation | planned |
 | 3 | Data model & security | Foundation | done |
-| 4 | Design system & UI primitives | Foundation | planned |
+| 4 | Design system & UI primitives | Foundation | done |
 | 5 | Onboarding & authentication | Slice 1 | planned |
 | 6 | Create a delivery | Slice 1 | planned |
 | 7 | Orders list & order detail | Slice 1 | planned |
@@ -62,7 +62,7 @@ Tables, RLS policies, status machine, wallet ledger, storage buckets and realtim
 - [x] Document it: `/document data model & security`
 Spec [0002](../specs/0002-data-model-security/index.md) · code in `supabase/` (migrations, `.test`, `functions`), `lib/supabase/types.ts`
 
-### 4. Design system & UI primitives · in-progress
+### 4. Design system & UI primitives · done
 Build the primitives in DESIGN.md (Button, IconButton, Input, PhoneInput, OtpInput, SelectCard, Segmented, StepperHeader, Chip, Sheet, TabBar with centre action, OrderCard, BalanceCard) with light/dark, accessibility labels and Reduce Motion.
 **Done when:** every primitive renders in both themes on a dev-only gallery screen, meets 44 pt targets, and passes an `impeccable audit`.
 - [x] Build it: `/develop design system & UI primitives`
@@ -71,8 +71,9 @@ Build the primitives in DESIGN.md (Button, IconButton, Input, PhoneInput, OtpInp
    - [x] RoleTabs rewired to the custom TabBar, centre action on customer tabs
    - [x] Dev gallery at `/dev/gallery` with route registration and i18n copy
    - [x] Reanimated jest mock; typecheck, lint, 69 tests, format all green
-- [ ] Verify it: `/check verify design system & UI primitives`
-- [ ] Test it: `/test design system & UI primitives`
+- [x] Verify it: `/check verify design system & UI primitives`
+- [x] Test it: `/test design system & UI primitives`
+   - [x] 103 tests over the 14 primitives, `cn`, both motion hooks and RoleTabs; suite at 172, typecheck, lint, format green
 code in `components/ui`, `components/role-tabs.tsx`, `app/dev/gallery.tsx`, `theme/tokens.ts`
 
 ## Slice 1: Customer can book and see a delivery

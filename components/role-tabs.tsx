@@ -29,7 +29,10 @@ export function RoleTabs({ tabs, fab }: { tabs: TabConfig[]; fab?: { label: Scre
             return config ? [{ key: route.key, label: t(`screens.${config.title}`), icon: config.icon }] : [];
           })}
           activeKey={state.routes[state.index]?.key ?? ''}
-          onSelect={(key) => navigation.navigate(key)}
+          onSelect={(key) => {
+            const route = state.routes.find((item) => item.key === key);
+            if (route) navigation.navigate(route.name);
+          }}
           fab={
             fab
               ? { label: t(`screens.${fab.label}`), onPress: () => router.push(fab.route as Href) }

@@ -4,6 +4,11 @@ import { cn } from './cn';
 
 // DESIGN.md balance-card: brand-subtle surface, label, display amount, white pill action.
 // Amount arrives already formatted (integer kobo is formatted at display only); tabular figures stop it jittering.
+
+// Urbanist has no U+20A6, so the system naira glyph overhangs its advance into the first digit. U+2009 is in
+// Urbanist, so it sets a real gap rather than pulling in another fallback glyph.
+const LEADING_CURRENCY_SYMBOL = /^(\D)(?=\d)/;
+
 export function BalanceCard({
   label,
   amount,
@@ -22,7 +27,7 @@ export function BalanceCard({
       <View className="gap-1">
         <Text className="font-sans text-label-sm text-secondary">{label}</Text>
         <Text style={{ fontVariant: ['tabular-nums'] }} className="font-sans text-display-lg text-primary">
-          {amount}
+          {amount.replace(LEADING_CURRENCY_SYMBOL, '$1 ')}
         </Text>
       </View>
       <Pressable
