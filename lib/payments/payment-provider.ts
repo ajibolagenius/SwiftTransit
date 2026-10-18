@@ -16,9 +16,9 @@ export type PayRequest = {
   card?: CardDetails;
   /**
    * The order this charge pays for, stable across every retry of it. An
-   * adapter must answer a repeated key with the original charge, never a
-   * second one, because a booking whose `pay_order` call was lost is replayed
-   * with the same order id.
+   * adapter must answer a repeated key with the charge it already took, never a
+   * second one, and with the same reference every time, because a booking whose
+   * `pay_order` call was lost is replayed with the same order id.
    */
   idempotencyKey: string;
 };

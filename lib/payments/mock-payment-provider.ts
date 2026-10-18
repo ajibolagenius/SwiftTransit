@@ -1,18 +1,20 @@
-import * as Crypto from 'expo-crypto';
-
 import { probeReachable } from '@/features/auth/offline';
 import type { CardDetails, PaymentProvider, PayRequest, PayResult } from './payment-provider';
 
 // AC-11, AC-18: a fake gateway with stable rules. About 1.5 seconds pending, a
 // `mock_` reference, a card ending 0002 that always declines, an offline block,
-// and one charge per idempotency key. No real card works here and no money moves.
+// and one reference per idempotency key. No real card works here and no money
+// moves.
 
 const PENDING_MS = 1500;
 const DECLINE_SUFFIX = '0002';
 
-// Lives for as long as the app process, which is the same lifetime a gateway
-// session has from the customer's side of a booking.
-const charged = new Map<string, string>();
+// A gateway keeps its own record of what a key already paid for, so a retry
+// after a lost response cannot take the money twice. This mock has no server to
+// hold that record, so the reference is derived from the key instead. The
+// replay answer then survives anything the app does, including a restart.
+const referenceFor = (key: string, method: PayRequest['method']) =>
+  `mock_${method === 'wallet' ? 'wallet_' : ''}${key}`;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -53,16 +55,9 @@ export const mockPaymentProvider: PaymentProvider = {
   async pay(request: PayRequest): Promise<PayResult> {
     if (!(await probeReachable())) return { ok: false, code: 'offline' };
 
-    // A repeated key is a retry of a charge that already landed, so it gets the
-    // answer it got the first time. This is the rule a real gateway enforces.
-    const replayed = charged.get(request.idempotencyKey);
-    if (replayed) return { ok: true, reference: replayed };
-
     if (request.method === 'wallet') {
       await wait(PENDING_MS);
-      const reference = `mock_wallet_${Crypto.randomUUID()}`;
-      charged.set(request.idempotencyKey, reference);
-      return { ok: true, reference };
+      return { ok: true, reference: referenceFor(request.idempotencyKey, 'wallet') };
     }
 
     const card = request.card;
@@ -70,8 +65,6 @@ export const mockPaymentProvider: PaymentProvider = {
 
     await wait(PENDING_MS);
     if (card.number.replace(/\D/g, '').endsWith(DECLINE_SUFFIX)) return { ok: false, code: 'card_declined' };
-    const reference = `mock_${Crypto.randomUUID()}`;
-    charged.set(request.idempotencyKey, reference);
-    return { ok: true, reference };
+    return { ok: true, reference: referenceFor(request.idempotencyKey, 'card') };
   },
 };

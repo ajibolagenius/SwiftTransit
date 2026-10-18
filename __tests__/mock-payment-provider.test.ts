@@ -6,12 +6,11 @@ import {
   luhnValid,
   mockPaymentProvider,
 } from '@/lib/payments/mock-payment-provider';
-import type { CardDetails } from '@/lib/payments/payment-provider';
+import type { CardDetails, PayRequest } from '@/lib/payments/payment-provider';
 
 jest.mock('@/features/auth/offline', () => ({
   probeReachable: jest.fn(() => Promise.resolve(true)),
 }));
-jest.mock('expo-crypto', () => ({ randomUUID: () => 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' }));
 
 const reachable = probeReachable as jest.MockedFunction<typeof probeReachable>;
 
@@ -68,7 +67,7 @@ describe('mockPaymentProvider', () => {
       card: goodCard,
       idempotencyKey: 'order-good-card',
     });
-    expect(result).toEqual({ ok: true, reference: 'mock_aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' });
+    expect(result).toEqual({ ok: true, reference: 'mock_order-good-card' });
   });
 
   // covers: AC-11
@@ -123,7 +122,7 @@ describe('mockPaymentProvider', () => {
     });
     expect(result).toEqual({
       ok: true,
-      reference: 'mock_wallet_aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      reference: 'mock_wallet_order-wallet',
     });
   });
 
@@ -140,7 +139,7 @@ describe('mockPaymentProvider', () => {
   });
 
   // covers: AC-14
-  it('answers a repeated key with the charge it already took', async () => {
+  it('answers a repeated key with the same reference it gave the first time', async () => {
     const first = await pay({
       amountKobo: 224900,
       method: 'card',
@@ -150,9 +149,29 @@ describe('mockPaymentProvider', () => {
     const again = await pay({
       amountKobo: 224900,
       method: 'card',
-      card: declinedCard,
+      card: goodCard,
       idempotencyKey: 'order-replay',
     });
+    expect(first).toEqual({ ok: true, reference: 'mock_order-replay' });
     expect(again).toEqual(first);
+  });
+
+  // covers: AC-14
+  it('settles two calls racing on one key the same way, so neither books twice', async () => {
+    const request: PayRequest = {
+      amountKobo: 224900,
+      method: 'card',
+      card: goodCard,
+      idempotencyKey: 'order-race',
+    };
+    jest.useFakeTimers();
+    const first = mockPaymentProvider.pay(request);
+    const again = mockPaymentProvider.pay(request);
+    await jest.runAllTimersAsync();
+    jest.useRealTimers();
+    await expect(Promise.all([first, again])).resolves.toEqual([
+      { ok: true, reference: 'mock_order-race' },
+      { ok: true, reference: 'mock_order-race' },
+    ]);
   });
 });

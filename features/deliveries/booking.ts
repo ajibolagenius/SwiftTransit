@@ -55,7 +55,10 @@ export type BookingInput = { draft: DeliveryDraft; method: PayMethod; card?: Car
 export type BookingOutcome = { order: Order; method: PayMethod };
 
 export async function book({ draft, method, card }: BookingInput): Promise<BookingOutcome> {
-  let key = draft.idempotencyKey;
+  // The live key is the one in the store, not the one on the input. A retry that
+  // arrives with a stale draft (a `pay_order` response that never came back) then
+  // replays the order the first attempt created instead of booking a second one.
+  let key = useDraftStore.getState().draft.idempotencyKey;
   let created = await createOrder(draft, method, key);
 
   // The expiry job moves an unpaid order to `cancelled` and a courier failure
