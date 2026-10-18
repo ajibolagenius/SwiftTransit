@@ -4,11 +4,15 @@ import { probeReachable } from '@/features/auth/offline';
 import type { CardDetails, PaymentProvider, PayRequest, PayResult } from './payment-provider';
 
 // AC-11, AC-18: a fake gateway with stable rules. About 1.5 seconds pending, a
-// `mock_` reference, a card ending 0002 that always declines, and an offline
-// block. No real card works here and no money moves.
+// `mock_` reference, a card ending 0002 that always declines, an offline block,
+// and one charge per idempotency key. No real card works here and no money moves.
 
 const PENDING_MS = 1500;
 const DECLINE_SUFFIX = '0002';
+
+// Lives for as long as the app process, which is the same lifetime a gateway
+// session has from the customer's side of a booking.
+const charged = new Map<string, string>();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -49,9 +53,16 @@ export const mockPaymentProvider: PaymentProvider = {
   async pay(request: PayRequest): Promise<PayResult> {
     if (!(await probeReachable())) return { ok: false, code: 'offline' };
 
+    // A repeated key is a retry of a charge that already landed, so it gets the
+    // answer it got the first time. This is the rule a real gateway enforces.
+    const replayed = charged.get(request.idempotencyKey);
+    if (replayed) return { ok: true, reference: replayed };
+
     if (request.method === 'wallet') {
       await wait(PENDING_MS);
-      return { ok: true, reference: `mock_wallet_${Crypto.randomUUID()}` };
+      const reference = `mock_wallet_${Crypto.randomUUID()}`;
+      charged.set(request.idempotencyKey, reference);
+      return { ok: true, reference };
     }
 
     const card = request.card;
@@ -59,6 +70,8 @@ export const mockPaymentProvider: PaymentProvider = {
 
     await wait(PENDING_MS);
     if (card.number.replace(/\D/g, '').endsWith(DECLINE_SUFFIX)) return { ok: false, code: 'card_declined' };
-    return { ok: true, reference: `mock_${Crypto.randomUUID()}` };
+    const reference = `mock_${Crypto.randomUUID()}`;
+    charged.set(request.idempotencyKey, reference);
+    return { ok: true, reference };
   },
 };

@@ -62,14 +62,24 @@ describe('card field checks', () => {
 describe('mockPaymentProvider', () => {
   // covers: AC-11
   it('returns a mock reference for a good card', async () => {
-    const result = await pay({ amountKobo: 224900, method: 'card', card: goodCard });
+    const result = await pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: goodCard,
+      idempotencyKey: 'order-good-card',
+    });
     expect(result).toEqual({ ok: true, reference: 'mock_aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' });
   });
 
   // covers: AC-11
   it('stays pending for about a second and a half before it answers', async () => {
     jest.useFakeTimers();
-    const promise = mockPaymentProvider.pay({ amountKobo: 224900, method: 'card', card: goodCard });
+    const promise = mockPaymentProvider.pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: goodCard,
+      idempotencyKey: 'order-pending',
+    });
     let settled = false;
     void promise.then(() => {
       settled = true;
@@ -84,7 +94,12 @@ describe('mockPaymentProvider', () => {
 
   // covers: AC-11
   it('always declines the card ending 0002', async () => {
-    const result = await pay({ amountKobo: 224900, method: 'card', card: declinedCard });
+    const result = await pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: declinedCard,
+      idempotencyKey: 'order-declined',
+    });
     expect(result).toEqual({ ok: false, code: 'card_declined' });
   });
 
@@ -94,13 +109,18 @@ describe('mockPaymentProvider', () => {
       amountKobo: 224900,
       method: 'card',
       card: { ...goodCard, cvv: '1' },
+      idempotencyKey: 'order-malformed',
     });
     expect(result).toEqual({ ok: false, code: 'invalid_card' });
   });
 
   // covers: AC-12
   it('hands the wallet path a reference too, because pay_order needs one', async () => {
-    const result = await pay({ amountKobo: 224900, method: 'wallet' });
+    const result = await pay({
+      amountKobo: 224900,
+      method: 'wallet',
+      idempotencyKey: 'order-wallet',
+    });
     expect(result).toEqual({
       ok: true,
       reference: 'mock_wallet_aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
@@ -110,7 +130,29 @@ describe('mockPaymentProvider', () => {
   // covers: AC-18
   it('says offline when Supabase cannot be reached, before any wait', async () => {
     reachable.mockResolvedValue(false);
-    const result = await pay({ amountKobo: 224900, method: 'card', card: goodCard });
+    const result = await pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: goodCard,
+      idempotencyKey: 'order-offline',
+    });
     expect(result).toEqual({ ok: false, code: 'offline' });
+  });
+
+  // covers: AC-14
+  it('answers a repeated key with the charge it already took', async () => {
+    const first = await pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: goodCard,
+      idempotencyKey: 'order-replay',
+    });
+    const again = await pay({
+      amountKobo: 224900,
+      method: 'card',
+      card: declinedCard,
+      idempotencyKey: 'order-replay',
+    });
+    expect(again).toEqual(first);
   });
 });

@@ -73,6 +73,10 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
     // Only a pick from outside the map moves the camera. A pan already left the
     // pin over the chosen spot, and re-mounting it there would throw the view away.
     if (!moveCamera) return;
+    // An explicit pick outranks a reverse geocode still on its way from a pan,
+    // which would otherwise land afterwards and overwrite what was just chosen.
+    seq.current += 1;
+    setResolving(false);
     setCameraCentre([next.lng, next.lat]);
     setCameraKey((value) => value + 1);
   };

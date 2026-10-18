@@ -30,10 +30,10 @@ function serverCode(message: string): string {
   return CODE_PATTERN.exec(message)?.[0] ?? 'network.offline';
 }
 
-async function createOrder(draft: DeliveryDraft, method: PayMethod): Promise<Order> {
+async function createOrder(draft: DeliveryDraft, method: PayMethod, idempotencyKey: string): Promise<Order> {
   const { data, error } = await supabase.rpc('create_order', {
     draft: toOrderDraftJsonb(draft, method),
-    idempotency_key: draft.idempotencyKey,
+    idempotency_key: idempotencyKey,
   });
   if (error) throw new BookingError(serverCode(error.message));
   if (!data) throw new BookingError('swifttransit.order.not_found');
@@ -55,15 +55,32 @@ export type BookingInput = { draft: DeliveryDraft; method: PayMethod; card?: Car
 export type BookingOutcome = { order: Order; method: PayMethod };
 
 export async function book({ draft, method, card }: BookingInput): Promise<BookingOutcome> {
-  const created = await createOrder(draft, method);
-  // A replayed key returns the order that key already booked. If that order is
-  // past `pending_payment`, it is paid, so charging again would take money a
-  // second time for a booking that is already complete.
+  let key = draft.idempotencyKey;
+  let created = await createOrder(draft, method, key);
+
+  // The expiry job moves an unpaid order to `cancelled` and a courier failure
+  // moves one to `failed`. Replaying either would show a dead booking as a
+  // confirmed one, so a draft pointing at one spends a fresh key on a fresh
+  // order instead. The new key goes back on the draft, so a retry of this call
+  // replays the order it is about to create rather than the dead one.
+  if (created.status === 'cancelled' || created.status === 'failed') {
+    key = Crypto.randomUUID();
+    useDraftStore.getState().update({ idempotencyKey: key });
+    created = await createOrder(draft, method, key);
+  }
+
+  // A replayed key on an order that already moved past `pending_payment` was
+  // paid once. Charging it again would take the money a second time.
   if (created.status !== 'pending_payment') return { order: created, method };
 
-  const result = await mockPaymentProvider.pay({ amountKobo: created.total_kobo, method, card });
+  const result = await mockPaymentProvider.pay({
+    amountKobo: created.total_kobo,
+    method,
+    card,
+    idempotencyKey: created.id,
+  });
   if (!result.ok) throw new BookingError(`payment.${result.code}`);
-  const order = await payOrder(created.id, draft.idempotencyKey, result.reference);
+  const order = await payOrder(created.id, key, result.reference);
   return { order, method };
 }
 

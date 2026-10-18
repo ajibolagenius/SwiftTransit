@@ -14,6 +14,13 @@ export type PayRequest = {
   amountKobo: number;
   method: PayMethod;
   card?: CardDetails;
+  /**
+   * The order this charge pays for, stable across every retry of it. An
+   * adapter must answer a repeated key with the original charge, never a
+   * second one, because a booking whose `pay_order` call was lost is replayed
+   * with the same order id.
+   */
+  idempotencyKey: string;
 };
 
 export type PayErrorCode = 'invalid_card' | 'card_declined' | 'timeout' | 'offline';
