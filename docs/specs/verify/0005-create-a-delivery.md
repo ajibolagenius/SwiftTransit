@@ -4,7 +4,7 @@ Run on a dev build (`npm run ios` / `npm run android`) with a real sign in, not
 `EXPO_PUBLIC_DEV_AUTH_STUB` (the stub leaves `session` null, so the quote, the
 `geo` calls and the booking all fail for the wrong reason).
 
-Deploy first: `supabase db push` for the two new migrations, then
+Deploy first: `supabase db push` for the new migrations, then
 `supabase functions deploy geo` and set `GEOAPIFY_API_KEY` as a function secret.
 Enable `pg_cron` on the project if it is not already on (spec 0002 relies on it
 for the photo sweep).
@@ -14,9 +14,9 @@ Derived from spec 0005 AC-20 and AC-21.
 ## AC-20: a lost session keeps the draft
 
 - [ ] Start the wizard and fill step 1, 2 and 3 (type, pickup, drop off). Stop on step 4 with the receiver form half written.
-- [ ] Expire the session: call `supabase.auth.signOut()` from another tab, or delete the `sb-<project ref>-auth-token` entry the app writes through `lib/secure-session-storage.ts`. Leaving the app until the token expires works too.
+- [ ] Expire the session. The dependable way: delete the `sb-<project ref>-auth-token` entry the app writes through `lib/secure-session-storage.ts`, then cold restart the app. Sign out from another tab, or in the dashboard, is a valid second route but it revokes the refresh token server side only, so the app notices at its next token refresh. Wait for that refresh, or force it by backgrounding the app past the refresh window, before you judge the result. Letting the token lapse on its own works too.
 - [ ] The app routes to sign in. Nothing about the draft is lost from memory, so if the process is also killed the customer starts again. That is the accepted cost in the spec.
-- [ ] Sign in with the same account. From the home card or the centre sheet, the wizard opens on step 4, the step the customer was left on, with type, pickup and drop off still in place (`resumeStep` in `features/deliveries/draft-store.ts`).
+- [ ] Sign in with the same account, in this app (there is no sign out button in the customer screens, so sign in here rather than reusing the other tab). From the home card or the centre sheet, the wizard opens on step 4, the step the customer was left on, with type, pickup and drop off still in place (`resumeStep` in `features/deliveries/draft-store.ts`).
 - [ ] Confirm the same behaviour after a backgrounding the app, on iOS and on Android.
 
 ## AC-21: an unpaid order expires on the server clock

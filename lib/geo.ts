@@ -28,8 +28,12 @@ export class GeoError extends Error {
 async function invokeGeo<T>(body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke('geo', { body });
   if (error) {
-    const context = (error as { context?: Response }).context;
-    const payload = (await context?.json().catch(() => null)) as { error?: string } | null;
+    // A fetch failure has no response here; only a real one carries the code.
+    const context = (error as { context?: unknown }).context;
+    const payload =
+      context instanceof Response
+        ? ((await context.json().catch(() => null)) as { error?: string } | null)
+        : null;
     throw new GeoError(payload?.error ?? 'geo.upstream');
   }
   return data as T;

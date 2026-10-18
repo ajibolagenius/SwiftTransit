@@ -265,6 +265,7 @@
     "searchLabel": "Search for a place",
     "searchPlaceholder": "Street, landmark or area",
     "searchEmpty": "No place matches that. Try a shorter name.",
+    "searching": "Searching…",
     "useMyLocation": "Use my location",
     "locating": "Finding you…",
     "locationDenied": "We can’t see where you are. The map is over Lagos, drag it to the spot.",
@@ -363,6 +364,14 @@
   "booked": {
     "title": "Delivery booked",
     "status": "Searching for a courier",
+    "statusPendingPayment": "Waiting for payment",
+    "statusAssigned": "A courier has taken your job",
+    "statusAtPickup": "Your courier is at the pickup point",
+    "statusPickedUp": "Your package is with the courier",
+    "statusAtDropoff": "Your courier is at the drop off point",
+    "statusDelivered": "Delivered",
+    "statusCancelled": "Cancelled",
+    "statusFailed": "This delivery could not be completed",
     "trackingLabel": "Tracking code",
     "copy": "Copy code",
     "copied": "Copied",
@@ -408,6 +417,7 @@
     "swifttransit.auth.invalid_session": "Your session is no longer valid. Please sign in again.",
     "swifttransit.storage.delete_failed": "We could not remove your files. Please try again.",
     "swifttransit.storage.too_large": "That image is over 5 MB. Choose a smaller one.",
+    "swifttransit.storage.upload_failed": "We could not upload that photo. You can still book without it.",
     "swifttransit.account.delete_failed": "We could not delete your account. Please try again."
   }
 }

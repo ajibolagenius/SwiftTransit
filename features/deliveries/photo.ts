@@ -29,7 +29,7 @@ export async function pickAndUploadPhoto(): Promise<PickedPhoto> {
   if (result.canceled) throw new PhotoError('canceled');
 
   const asset = result.assets[0];
-  if (!asset) throw new PhotoError('swifttransit.storage.too_large');
+  if (!asset) throw new PhotoError('swifttransit.storage.upload_failed');
   if (asset.fileSize && asset.fileSize > MAX_BYTES) throw new PhotoError('swifttransit.storage.too_large');
 
   const { data } = await supabase.auth.getSession();
@@ -47,7 +47,13 @@ export async function pickAndUploadPhoto(): Promise<PickedPhoto> {
   } as unknown as Blob);
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, form);
-  if (error) throw new PhotoError('swifttransit.storage.too_large');
+  if (error) {
+    // Only a refused size is worth the "over 5 MB" message. Everything else,
+    // including a network drop, gets the generic one that says booking can go on.
+    throw new PhotoError(
+      error.status === 413 ? 'swifttransit.storage.too_large' : 'swifttransit.storage.upload_failed',
+    );
+  }
   return { uri: asset.uri, path };
 }
 

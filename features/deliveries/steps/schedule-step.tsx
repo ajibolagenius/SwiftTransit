@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Segmented } from '@/components/ui/segmented';
 import { selectDraft, useDraftStore } from '../draft-store';
 import { dayLabel, dayOptions, slotsForDay, type DayOption } from '../schedule';
+import { scheduleSlice } from '../schemas';
 import { WizardScreen, type StepProps } from '../wizard';
 
 // AC-7: ASAP or a two hour slot inside seven days. The slot's start instant is
@@ -58,6 +59,10 @@ export function ScheduleStep({ onBack, onContinue }: StepProps) {
   const days = dayOptions(now);
   const day: DayOption = days[dayIndex] ?? days[0];
   const slots = slotsForDay(day, now);
+  // A slot picked earlier can fall out of the seven day window while the wizard
+  // stays open. The step guard would then send the customer back here with no
+  // explanation, so the step says it in the same words the list already uses.
+  const stale = draft.scheduledAt !== null && !scheduleSlice.safeParse(draft).success;
   const labels = {
     today: t('newDelivery.schedule.dayToday'),
     tomorrow: t('newDelivery.schedule.dayTomorrow'),
@@ -69,7 +74,7 @@ export function ScheduleStep({ onBack, onContinue }: StepProps) {
       title={t('newDelivery.schedule.title')}
       body={t('newDelivery.schedule.body')}
       continueLabel={t('newDelivery.continue')}
-      continueDisabled={mode === 'slot' && !draft.scheduledAt}
+      continueDisabled={mode === 'slot' && (!draft.scheduledAt || stale)}
       onContinue={() => {
         if (mode === 'asap') update({ scheduledAt: null });
         onContinue();
@@ -109,6 +114,12 @@ export function ScheduleStep({ onBack, onContinue }: StepProps) {
                 />
               ))}
             </ScrollView>
+
+            {stale ? (
+              <Text accessibilityLiveRegion="polite" className="font-sans text-body-md text-danger">
+                {t('newDelivery.schedule.outOfRange')}
+              </Text>
+            ) : null}
 
             {slots.length === 0 ? (
               <Text accessibilityLiveRegion="polite" className="font-sans text-body-md text-secondary">

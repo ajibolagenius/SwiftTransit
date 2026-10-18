@@ -7,7 +7,7 @@
 // this project. The upstream key never leaves the function.
 //
 // POST /functions/v1/geo, Authorization: Bearer <user JWT>
-// body: { action: 'autocomplete', text, bias? } | { action: 'reverse', lat, lng }
+// body: { action: 'autocomplete', text } | { action: 'reverse', lat, lng }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -21,6 +21,7 @@ type GeoapifyResult = {
   country?: string;
   country_code?: string;
   address_line?: string;
+  formatted?: string;
   lat?: number;
   lon?: number;
 };
@@ -33,8 +34,9 @@ type Prediction = {
   lng: number;
 };
 
-// Nigerial first: the product books deliveries in Lagos, so a search for
-// "Ikeja" must not have to compete with an Ikeja somewhere else.
+// Nigeria first, pinned here rather than taken from the caller: the product
+// books deliveries in Lagos, so a search for "Ikeja" must not have to compete
+// with an Ikeja somewhere else, and no client can widen that.
 const BIAS_COUNTRY = 'ng';
 
 function json(body: unknown, status = 200) {
@@ -46,6 +48,9 @@ function fail(error: string, status: number) {
 }
 
 function lineFor(r: GeoapifyResult): string {
+  // The complete formatted address first: a courier drives to a whole address,
+  // and `address_line` alone can be a street with no city on it.
+  if (r.formatted) return r.formatted;
   if (r.address_line) return r.address_line;
   return [r.street, r.suburb, r.city, r.state].filter(Boolean).join(', ');
 }
@@ -92,7 +97,7 @@ Deno.serve(async (req) => {
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) return fail('swifttransit.auth.invalid_session', 401);
 
-  let body: { action?: string; text?: string; lat?: number; lng?: number; bias?: string };
+  let body: { action?: string; text?: string; lat?: number; lng?: number };
   try {
     body = await req.json();
   } catch {
@@ -106,7 +111,7 @@ Deno.serve(async (req) => {
       if (text.length < 2) return json({ predictions: [] });
       upstream = await callGeoapify('geocode/autocomplete', {
         text,
-        bias: `country:${body.bias ?? BIAS_COUNTRY}`,
+        bias: `country:${BIAS_COUNTRY}`,
         limit: '6',
       });
     } else if (body.action === 'reverse') {

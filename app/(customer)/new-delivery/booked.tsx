@@ -14,10 +14,32 @@ import { saveAddress } from '@/features/deliveries/addresses';
 import { selectDraft, useDraftStore } from '@/features/deliveries/draft-store';
 import { errorLabel } from '@/lib/error-label';
 import { formatKobo } from '@/lib/money';
+import type { Database } from '@/lib/supabase/types';
 import { useThemeColors } from '@/theme/use-theme';
 
 // AC-15, AC-16: the tracking code the order row came back with, the status that
 // row holds, and an optional copy of the two places into `addresses`.
+
+// Every status the server can hand back, translated. An unmapped value (a status
+// added on the server after this build) falls to `booked.status`, never the raw
+// enum word.
+const STATUS_KEYS = {
+  pending_payment: 'booked.statusPendingPayment',
+  searching: 'booked.status',
+  assigned: 'booked.statusAssigned',
+  at_pickup: 'booked.statusAtPickup',
+  picked_up: 'booked.statusPickedUp',
+  at_dropoff: 'booked.statusAtDropoff',
+  delivered: 'booked.statusDelivered',
+  cancelled: 'booked.statusCancelled',
+  failed: 'booked.statusFailed',
+} as const satisfies Record<Database['public']['Enums']['order_status'], string>;
+
+type StatusKey = (typeof STATUS_KEYS)[keyof typeof STATUS_KEYS];
+
+function statusKeyFor(status: string | undefined): StatusKey {
+  return (status ? STATUS_KEYS[status as keyof typeof STATUS_KEYS] : undefined) ?? 'booked.status';
+}
 
 function ToggleRow({ label, value, onToggle }: { label: string; value: boolean; onToggle: () => void }) {
   const colors = useThemeColors();
@@ -60,9 +82,9 @@ export default function BookedScreen() {
 
   const trackingCode = params.trackingCode ?? '';
   const totalKobo = Number(params.totalKobo ?? 0);
-  // The status line is the row's own status after `pay_order`, never an assumption.
-  const statusLabel =
-    params.status === 'searching' ? t('booked.status') : (params.status ?? t('booked.status'));
+  // The status line is the row's own status after `pay_order`, never an assumption,
+  // and it is always read through a translation.
+  const statusLabel = t(statusKeyFor(params.status));
   const methodLabel = params.method === 'wallet' ? t('booked.methodWallet') : t('booked.methodCard');
 
   const copyCode = async () => {

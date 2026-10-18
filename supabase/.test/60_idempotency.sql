@@ -65,5 +65,24 @@ select public.pay_order(
 select _test.expect_eq('one debit for the retry',
   (select count(*) from public.wallet_transactions where idempotency_key = 'pay:pay-idem-2'), 1);
 
+-- A key that already belongs to another customer is refused, and never
+-- replayed as that customer's order (receiver name, phone, both addresses).
+select _test.expect_refused('foreign idempotency key',
+  'select public.create_order(
+     ''{"type":"parcel","package_size":"medium","weight_kg":3,"payment_method":"card",
+       "pickup_line":"Yaba","pickup_lat":6.5092,"pickup_lng":3.3777,
+       "dropoff_line":"Ikeja","dropoff_lat":6.6018,"dropoff_lng":3.3515,
+       "receiver_name":"Tunde","receiver_phone":"+2348019999999"}''::jsonb,
+     ''idem-1'')');
+
+-- Back as the owner, because RLS hides c1's row from c2. The one order that
+-- holds that key is still c1 own, and no second one exists.
+set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-0000000000c1","role":"authenticated"}';
+select _test.expect_eq('one order still holds that key',
+  (select count(*) from public.orders where idempotency_key = 'idem-1'), 1);
+select _test.expect_true('and it is still customer c1 own order',
+  (select customer_id = '00000000-0000-4000-8000-0000000000c1'
+     from public.orders where idempotency_key = 'idem-1'));
+
 rollback;
 

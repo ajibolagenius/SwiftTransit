@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
 import type { Place } from './schemas';
@@ -15,8 +16,24 @@ export type SavedAddress = {
 };
 
 export function useSavedAddresses() {
+  // Read off the Supabase session, not the auth context, so the dev role stub
+  // (which leaves `session` null) still shows the signed in customer's places.
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setUserId(data.session?.user.id);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return useQuery({
-    queryKey: ['addresses'],
+    // Per customer, so a sign in as someone else cannot show the previous
+    // account's addresses out of the query cache.
+    queryKey: ['addresses', userId],
+    enabled: Boolean(userId),
     staleTime: 60_000,
     queryFn: async (): Promise<SavedAddress[]> => {
       const { data, error } = await supabase

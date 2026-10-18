@@ -65,6 +65,12 @@ function PriceLine({ label, value, strong = false }: { label: string; value: str
   );
 }
 
+/** Digits only, with the slash added after the month, so `0429` reads `04/29`. */
+function formatExpiryInput(input: string): string {
+  const digits = input.replace(/\D/g, '').slice(0, 4);
+  return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
 export default function SummaryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -99,9 +105,10 @@ export default function SummaryScreen() {
     expiry: !expiryValid(card.expiry),
     cvv: !cvvValid(card.cvv),
   };
-  const cardReady = method !== 'card' || (!cardProblems.number && !cardProblems.expiry && !cardProblems.cvv);
-  const canPay =
-    !offline && total !== null && !quote.isError && cardReady && !shortWallet && !booking.isPending;
+  const cardReady = !cardProblems.number && !cardProblems.expiry && !cardProblems.cvv;
+  // An invalid card does not grey out Pay. The customer presses it, sees which
+  // field is wrong, and fixes it (see `pay`).
+  const canPay = !offline && total !== null && !quote.isError && !shortWallet && !booking.isPending;
   const errorKey = booking.error instanceof BookingError ? booking.error.key : null;
 
   const pay = () => {
@@ -246,7 +253,9 @@ export default function SummaryScreen() {
                   label={t('summary.cardExpiryLabel')}
                   placeholder={t('summary.cardExpiryPlaceholder')}
                   value={card.expiry}
-                  onChangeText={(value) => setCard((current) => ({ ...current, expiry: value }))}
+                  onChangeText={(value) =>
+                    setCard((current) => ({ ...current, expiry: formatExpiryInput(value) }))
+                  }
                   keyboardType="number-pad"
                   autoComplete="cc-exp"
                   maxLength={5}

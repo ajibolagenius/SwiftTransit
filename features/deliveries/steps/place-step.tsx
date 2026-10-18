@@ -68,15 +68,18 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
     setQuery('');
   }, [step]);
 
-  const setPlace = (next: Place) => {
+  const setPlace = (next: Place, moveCamera = false) => {
     update({ [key]: next } as { pickup?: Place; dropoff?: Place });
+    // Only a pick from outside the map moves the camera. A pan already left the
+    // pin over the chosen spot, and re-mounting it there would throw the view away.
+    if (!moveCamera) return;
     setCameraCentre([next.lng, next.lat]);
     setCameraKey((value) => value + 1);
   };
 
   // A pin drop becomes a place name through reverse geocoding. If geo is down the
   // step still completes, under the generic "Dropped pin" label (AC-19).
-  const resolveCentre = async ([lng, lat]: [number, number]) => {
+  const resolveCentre = async ([lng, lat]: [number, number], moveCamera = false) => {
     const attempt = ++seq.current;
     setResolving(true);
     let line = t('newDelivery.droppedPin');
@@ -88,10 +91,10 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
     }
     if (attempt !== seq.current) return;
     setResolving(false);
-    setPlace({ line, lat, lng });
+    setPlace({ line, lat, lng }, moveCamera);
   };
 
-  const useMyLocation = async () => {
+  const locateMe = async () => {
     setLocating(true);
     setNoFix(false);
     const fix = await readCurrentPosition();
@@ -100,7 +103,7 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
       setNoFix(true);
       return;
     }
-    await resolveCentre([fix.lng, fix.lat]);
+    await resolveCentre([fix.lng, fix.lat], true);
     setLocating(false);
   };
 
@@ -138,7 +141,7 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
                 </Button>
               </View>
             ) : loading ? (
-              <Text className="p-5 font-sans text-body-md text-tertiary">{t('summary.priceLoading')}</Text>
+              <Text className="p-5 font-sans text-body-md text-tertiary">{t('newDelivery.searching')}</Text>
             ) : predictions.length === 0 ? (
               <Text className="p-5 font-sans text-body-md text-secondary">
                 {t('newDelivery.searchEmpty')}
@@ -152,11 +155,14 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
                     subtitle={prediction.line}
                     onPress={() => {
                       setQuery('');
-                      setPlace({
-                        line: prediction.line || prediction.name,
-                        lat: prediction.lat,
-                        lng: prediction.lng,
-                      });
+                      setPlace(
+                        {
+                          line: prediction.line || prediction.name,
+                          lat: prediction.lat,
+                          lng: prediction.lng,
+                        },
+                        true,
+                      );
                     }}
                   />
                 ))}
@@ -190,7 +196,7 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
           </View>
 
           {step === 2 ? (
-            <Button variant="secondary" loading={locating} onPress={() => void useMyLocation()}>
+            <Button variant="secondary" loading={locating} onPress={() => void locateMe()}>
               {t('newDelivery.useMyLocation')}
             </Button>
           ) : null}
@@ -208,12 +214,15 @@ export function PlaceStep({ step, onBack, onContinue }: StepProps & { step: 2 | 
                     accessibilityLabel={`${t('newDelivery.savedAddresses')}: ${address.label}, ${address.line}`}
                     accessibilityState={{ selected: place?.addressId === address.id }}
                     onPress={() =>
-                      setPlace({
-                        line: address.line,
-                        lat: address.lat,
-                        lng: address.lng,
-                        addressId: address.id,
-                      })
+                      setPlace(
+                        {
+                          line: address.line,
+                          lat: address.lat,
+                          lng: address.lng,
+                          addressId: address.id,
+                        },
+                        true,
+                      )
                     }
                     className={`max-w-56 rounded-xl border p-4 ${
                       place?.addressId === address.id
