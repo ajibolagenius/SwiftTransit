@@ -9,7 +9,7 @@
 // POST /functions/v1/geo, Authorization: Bearer <user JWT>
 // body: { action: 'autocomplete', text, bias? } | { action: 'reverse', lat, lng }
 
-import { Client } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 type GeoapifyResult = {
   place_id?: string;
@@ -84,7 +84,9 @@ Deno.serve(async (req) => {
   const token = req.headers.get('Authorization')?.split(' ')[1];
   if (!token) return fail('swifttransit.auth.no_session', 401);
 
-  const userClient = new Client(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+  const userClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    // No storage in the edge runtime, so there is nothing to persist or refresh.
+    auth: { persistSession: false },
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
   const { data: userData, error: userError } = await userClient.auth.getUser();

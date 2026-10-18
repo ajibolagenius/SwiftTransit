@@ -5,7 +5,7 @@
 // (profile, applications, status, addresses, orders, events, messages,
 // ledger). POST /functions/v1/delete-account, Authorization: Bearer <user JWT>.
 
-import { Client } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const buckets = ['avatars', 'package-photos', 'licences'];
 
@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
   }
 
   // Verify the caller's own JWT before acting on their data.
-  const userClient = new Client(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
+  const userClient = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    auth: { persistSession: false },
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
   const { data: userData, error: userError } = await userClient.auth.getUser();
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
   }
   const uid = userData.user.id;
 
-  const admin = new Client(url, serviceKey, {
+  const admin = createClient(url, serviceKey, {
     auth: { persistSession: false },
   });
 
