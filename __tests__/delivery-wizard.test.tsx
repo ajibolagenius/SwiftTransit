@@ -1,6 +1,8 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import type { ReactNode } from 'react';
+import { AccessibilityInfo } from 'react-native';
+import { FadeIn, FadeInRight } from 'react-native-reanimated';
 
 import { useDraftStore } from '@/features/deliveries/draft-store';
 import type { AuthState } from '@/features/auth/guards';
@@ -73,6 +75,16 @@ async function open(initialUrl: string) {
   return router;
 }
 
+type Rendered = Awaited<ReturnType<typeof open>>;
+
+// The step frame hands its content to Reanimated through an `entering` animation.
+// Nothing actually animates under jest, so the animation the frame asks for is the
+// observable, and it is the one thing a test can check about the step transition.
+function stepEntering(container: Rendered['container']) {
+  const [frame] = container.queryAll((node) => node.props?.entering !== undefined);
+  return frame?.props?.entering;
+}
+
 beforeEach(() => {
   useDraftStore.getState().restart();
   mockAuth = { status: 'signed-in', session: null, role: 'customer' };
@@ -122,6 +134,67 @@ describe('entering the wizard', () => {
     });
 
     expect(await screen.findByText('Who is receiving it?')).toBeTruthy();
+  });
+});
+
+describe('the wizard frame', () => {
+  // The guard sends a bare deep link back to step 1, so the frame tests fill the
+  // draft to the receiver step first, the same way openReceiver does below.
+  async function openFrame(url = '/new-delivery/4') {
+    fillDraft({ type: 'parcel', pickup: yaba, dropoff: ikeja });
+    return open(url);
+  }
+
+  // covers: AC-1
+  it('names the screen, the step and the back control', async () => {
+    await openFrame();
+
+    expect(await screen.findByRole('header', { name: 'New delivery' })).toBeTruthy();
+    expect(screen.getByText('Step 4 of 6')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Receiver' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Go back' })).toBeTruthy();
+  });
+
+  // covers: AC-22
+  it('enters a step with a fade and a slide', async () => {
+    const view = await openFrame();
+    await screen.findByText('Who is receiving it?');
+
+    // The plain SlideIn variants are the ones that leave this flex-1 content about
+    // 60 pt too high once they settle on Reanimated 4.5, so the frame must not ask
+    // for them. Identity against FadeInRight is what holds that line.
+    expect(stepEntering(view.container)).toBe(FadeInRight);
+  });
+
+  // covers: AC-22
+  it('cross fades the step when the platform asks for Reduce Motion', async () => {
+    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+
+    const view = await openFrame();
+    await screen.findByText('Who is receiving it?');
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(stepEntering(view.container)).toBe(FadeIn);
+    jest.restoreAllMocks();
+  });
+
+  // covers: AC-1
+  it('takes the back control to the previous step', async () => {
+    await open('/new-delivery/1');
+    await act(async () => {
+      fireEvent.press(await screen.findByText('Parcel'));
+    });
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: /Continue/ }));
+    });
+    expect(await screen.findByText('Where do we collect it?')).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: 'Go back' }));
+    });
+    expect(await screen.findByText('What are you sending?')).toBeTruthy();
   });
 });
 
@@ -184,6 +257,153 @@ describe('step 1, the delivery type', () => {
 
     expect(useDraftStore.getState().draft.type).toBe('parcel');
     expect(await screen.findByText('Where do we collect it?')).toBeTruthy();
+  });
+});
+
+describe('step 4, the receiver', () => {
+  // The step guard needs the draft filled to here, otherwise the deep link
+  // lands on the first incomplete step instead of the receiver form.
+  async function openReceiver() {
+    fillDraft({ type: 'parcel', pickup: yaba, dropoff: ikeja });
+    await open('/new-delivery/4');
+    const phone = await screen.findByLabelText('Receiver phone, +234');
+    return { phone, name: screen.getByLabelText('Receiver name') };
+  }
+
+  // covers: AC-5
+  it('shows the inline error the moment the number is invalid, with Continue held', async () => {
+    const { phone } = await openReceiver();
+
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+    expect(screen.queryByText('Enter a valid Nigerian mobile number.')).toBeNull();
+
+    await act(async () => {
+      fireEvent.changeText(phone, '12345');
+    });
+
+    expect(screen.getByText('Enter a valid Nigerian mobile number.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+  });
+
+  // covers: AC-5
+  it('flags a name too short to be a full name', async () => {
+    const { name } = await openReceiver();
+
+    await act(async () => {
+      fireEvent.changeText(name, 'A');
+    });
+
+    expect(screen.getByText('Enter the receiver’s full name.')).toBeTruthy();
+  });
+
+  // covers: AC-5
+  it('stores the number as E.164 with the +234 default and moves on', async () => {
+    const { phone, name } = await openReceiver();
+
+    await act(async () => {
+      fireEvent.changeText(name, 'Amina Yusuf');
+      // Typed the way a customer dials locally, leading zero and all.
+      fireEvent.changeText(phone, '08021234567');
+    });
+
+    const cont = await screen.findByRole('button', { name: /Continue/ });
+    expect(cont.props.accessibilityState).toMatchObject({ disabled: false });
+    await act(async () => {
+      fireEvent.press(cont);
+    });
+
+    expect(useDraftStore.getState().draft).toMatchObject({
+      receiverName: 'Amina Yusuf',
+      receiverPhone: '+2348021234567',
+    });
+    expect(await screen.findByText('What is the package like?')).toBeTruthy();
+  });
+
+  // covers: AC-5
+  it('holds Continue while the name is missing, even with a valid number', async () => {
+    const { phone } = await openReceiver();
+
+    await act(async () => {
+      fireEvent.changeText(phone, '08021234567');
+    });
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+
+    await act(async () => {
+      fireEvent.changeText(screen.getByLabelText('Receiver name'), 'Amina Yusuf');
+    });
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: false,
+    });
+  });
+
+  // covers: AC-5
+  it('drops the phone error once the number turns valid', async () => {
+    const { phone } = await openReceiver();
+
+    await act(async () => {
+      fireEvent.changeText(phone, '12345');
+    });
+    expect(screen.getByText('Enter a valid Nigerian mobile number.')).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.changeText(phone, '08021234567');
+    });
+    expect(screen.queryByText('Enter a valid Nigerian mobile number.')).toBeNull();
+  });
+
+  // covers: AC-5
+  it('refuses a mobile number from another country', async () => {
+    const { phone } = await openReceiver();
+
+    await act(async () => {
+      fireEvent.changeText(phone, '+14155552671');
+    });
+
+    expect(screen.getByText('Enter a valid Nigerian mobile number.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+  });
+
+  // covers: AC-5
+  it('states who sees the number and opens the privacy policy from the link', async () => {
+    await openReceiver();
+
+    expect(
+      screen.getByText('This number and both addresses are shared with the courier who takes the job.'),
+    ).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(screen.getByRole('link', { name: 'Read the privacy policy' }));
+    });
+    expect(await screen.findByText('Privacy Policy')).toBeTruthy();
+  });
+
+  // covers: AC-5, AC-20
+  it('reopens a stored receiver with the number ready to send', async () => {
+    fillDraft({
+      type: 'parcel',
+      pickup: yaba,
+      dropoff: ikeja,
+      receiverName: 'Amina Yusuf',
+      receiverPhone: '+2348021234567',
+    });
+    await open('/new-delivery/4');
+
+    // The field carries the national digits, so the dial code stays in the prefix.
+    const phone = await screen.findByLabelText('Receiver phone, +234');
+    expect(phone.props.value).toBe('8021234567');
+    expect(screen.getByLabelText('Receiver name').props.value).toBe('Amina Yusuf');
+    expect(screen.queryByText('Enter a valid Nigerian mobile number.')).toBeNull();
+    expect(screen.getByRole('button', { name: /Continue/ }).props.accessibilityState).toMatchObject({
+      disabled: false,
+    });
   });
 });
 

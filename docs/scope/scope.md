@@ -105,9 +105,9 @@ The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step w
    - [x] Summary, mock payment, submit flow, confirmation and saved address (AC-11, AC-12, AC-13, AC-15, AC-16, AC-18)
    - [x] Entry points, session and expiry handling, i18n, accessibility, tests (AC-1, AC-17, AC-20, AC-21, AC-22, AC-23)
 - [ ] Verify it: `/check verify create a delivery`
-- [ ] Test it: `/test create a delivery`
-- [ ] Review it (fresh model): `/check review create a delivery`
-- [ ] Document it: `/document create a delivery`
+- [x] Test it: `/test create a delivery`
+- [x] Review it (fresh model): `/check review create a delivery`
+- [x] Document it: `/document create a delivery`
 Spec [0005](../specs/0005-create-a-delivery.md) · code in `features/deliveries/`, `app/(customer)/new-delivery/`, `lib/` (geo, money, payments, query, error-label), `supabase/` (migrations, `.test`, `functions/geo`), `locales/en.json`
 
 ### 7. Orders list & order detail

@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       if (text.length < 2) return json({ predictions: [] });
       upstream = await callGeoapify('geocode/autocomplete', {
         text,
-        bias: `country:${BIAS_COUNTRY}`,
+        bias: `countrycode:${BIAS_COUNTRY}`,
         limit: '6',
       });
     } else if (body.action === 'reverse') {
@@ -138,8 +138,13 @@ Deno.serve(async (req) => {
   if (upstream.status === 429) return fail('geo.quota', 429);
   if (!upstream.ok) return fail('geo.upstream', 502);
 
-  const payload = (await upstream.json().catch(() => null)) as { results?: GeoapifyResult[] } | null;
-  const results = payload?.results ?? [];
+  // Geoapify answers both endpoints as GeoJSON: the places live in `features`,
+  // each with its fields under `properties`. Reading `results` here returned an
+  // empty list even on a successful call, because that key never exists.
+  const payload = (await upstream.json().catch(() => null)) as {
+    features?: { properties?: GeoapifyResult }[];
+  } | null;
+  const results = (payload?.features ?? []).map((feature) => feature.properties ?? {});
 
   if (body.action === 'reverse') {
     const place = toPrediction(results[0] ?? {}, 0);
@@ -156,6 +161,17 @@ Deno.serve(async (req) => {
     });
   }
 
-  const predictions = results.map(toPrediction).filter((p): p is Prediction => p !== null);
+  // Geoapify treats `bias` as a ranking hint, not a filter: a live search for
+  // "Ikeja" returned four places in Japan alongside two in Lagos. This product
+  // books deliveries in Nigeria, so a place known to be in another country
+  // never wins the list. A place with no country code is kept, because Geoapify
+  // omits it on some valid local answers, and the foreign ones survive only when
+  // nothing plausible matched at all.
+  const isForeign = (r: GeoapifyResult) =>
+    typeof r.country_code === 'string' && r.country_code !== BIAS_COUNTRY;
+  const local = results.filter((r) => !isForeign(r));
+  const predictions = (local.length > 0 ? local : results)
+    .map(toPrediction)
+    .filter((p): p is Prediction => p !== null);
   return json({ predictions });
 });

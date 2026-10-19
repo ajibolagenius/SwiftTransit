@@ -25,9 +25,10 @@ The SQL side is already proven in the harness (`bash supabase/.test/run.sh`, scr
 `85_expire_pending_orders.sql`): one old row moves, a fresh row and a paid row do
 not, exactly one `order_events` row with `actor_id is null`, a second run moves
 nothing, and an authenticated client call to `expire_pending_orders()` is refused.
+Re-run on 2026-10-19 against the local stack, all five assertions green.
 What is left is the schedule and the app view of it.
 
-- [ ] Confirm the job is registered: `select jobname, schedule from cron.job;` shows `expire-pending-orders` on `*/5 * * * *`. If not, run `supabase/functions/_shared/cron-definitions.sql` in the dashboard SQL editor.
+- [x] Confirm the job is registered: `select jobname, schedule from cron.job;` shows `expire-pending-orders` on `*/5 * * * *`. If not, run `supabase/functions/_shared/cron-definitions.sql` in the dashboard SQL editor.
 - [ ] Start a booking, reach the card sheet, and leave it without paying. Wait past 15 minutes plus one cron tick.
 - [ ] `select status from public.orders where tracking_code = '<that code>';` returns `cancelled`, and `select status, actor_id from public.order_events where order_id = '<that id>' order by created_at;` ends with a `cancelled` row whose `actor_id` is null.
 - [ ] Check the wallet: a booking that died before payment never moved the balance, so `wallet_balance()` returns the same figure as before it started.

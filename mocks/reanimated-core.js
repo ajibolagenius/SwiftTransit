@@ -36,7 +36,7 @@ function AnimatedComponent(Component) {
   return Wrapper;
 }
 
-// Entering animations are declared as a chain (SlideInRight.duration(250)).
+// Entering animations are declared as a chain (FadeInRight.duration(250)).
 // Nothing animates under jest, so every link in the chain returns the same
 // inert spec and the prop is ignored by the component stubs above.
 function animationSpec() {
@@ -77,7 +77,7 @@ module.exports = {
   CurvedTransition: {},
   Keyframe: class {},
   FadeIn: animationSpec(),
-  SlideInLeft: animationSpec(),
-  SlideInRight: animationSpec(),
+  FadeInLeft: animationSpec(),
+  FadeInRight: animationSpec(),
   Easing: { linear: (n) => n, ease: (n) => n, quad: (n) => n },
 };

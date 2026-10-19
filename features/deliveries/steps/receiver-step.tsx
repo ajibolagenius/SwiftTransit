@@ -21,7 +21,6 @@ export function ReceiverStep({ onBack, onContinue }: StepProps) {
   const [name, setName] = useState(draft.receiverName ?? '');
   // The field carries the national number; +234 is the default dial code.
   const [phone, setPhone] = useState((draft.receiverPhone ?? '').replace('+234', ''));
-  const [showErrors, setShowErrors] = useState(false);
 
   const e164 = toE164(phone);
   const nameProblem = receiverSlice.shape.receiverName.safeParse(name.trim()).success
@@ -29,9 +28,11 @@ export function ReceiverStep({ onBack, onContinue }: StepProps) {
     : t('newDelivery.receiver.nameInvalid');
   const phoneProblem = e164 ? null : t('newDelivery.receiver.phoneInvalid');
 
+  // The inline error shows live as a field turns invalid (AC-5), the same way the
+  // package step surfaces its weight error, while Continue stays disabled until
+  // both checks pass. The `!e164` branch only narrows the type for the store.
   const continueBooking = () => {
-    if (!e164 || nameProblem) {
-      setShowErrors(true);
+    if (!e164) {
       return;
     }
     update({ receiverName: name.trim(), receiverPhone: e164 });
@@ -57,7 +58,7 @@ export function ReceiverStep({ onBack, onContinue }: StepProps) {
           icon={User}
           autoComplete="name"
           textContentType="name"
-          error={showErrors ? (nameProblem ?? undefined) : undefined}
+          error={name.length > 0 ? (nameProblem ?? undefined) : undefined}
         />
         <PhoneInput
           label={t('newDelivery.receiver.phoneLabel')}
@@ -65,7 +66,7 @@ export function ReceiverStep({ onBack, onContinue }: StepProps) {
           value={phone}
           onChangeText={setPhone}
           helper={t('newDelivery.receiver.body')}
-          error={showErrors ? (phoneProblem ?? undefined) : undefined}
+          error={phone.length > 0 ? (phoneProblem ?? undefined) : undefined}
         />
         <View className="gap-2 rounded-xl border border-default bg-tertiary p-5">
           <Text className="font-sans text-body-sm text-secondary">{t('newDelivery.receiver.privacy')}</Text>

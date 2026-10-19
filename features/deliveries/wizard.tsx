@@ -2,7 +2,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
-import Animated, { FadeIn, SlideInLeft, SlideInRight } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -46,13 +46,14 @@ export function WizardScreen({
     previous.current = step;
   }, [step]);
 
-  // DESIGN.md motion: wizard steps slide horizontally over ~250 ms; Reduce
-  // Motion replaces the slide with a cross fade.
+  // DESIGN.md motion: wizard steps slide horizontally over ~250 ms; Reduce Motion
+  // cross-fades instead. SlideIn* is avoided: on Reanimated 4.5 it leaves this
+  // flex-1 container's content ~60 pt too high once the animation settles.
   const entering = reduced
     ? FadeIn.duration(200)
     : forward
-      ? SlideInRight.duration(250)
-      : SlideInLeft.duration(250);
+      ? FadeInRight.duration(250)
+      : FadeInLeft.duration(250);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-primary">
