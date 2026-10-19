@@ -36,6 +36,17 @@ function AnimatedComponent(Component) {
   return Wrapper;
 }
 
+// Entering animations are declared as a chain (SlideInRight.duration(250)).
+// Nothing animates under jest, so every link in the chain returns the same
+// inert spec and the prop is ignored by the component stubs above.
+function animationSpec() {
+  const spec = {};
+  for (const method of ['duration', 'delay', 'springDamping', 'damping', 'property']) {
+    spec[method] = () => spec;
+  }
+  return spec;
+}
+
 // expo-router's testing-library does `Reanimated.default.call = () => {}`, so the
 // default must be an extensible object or function (forwardRef results are frozen).
 function Animated() {
@@ -65,5 +76,8 @@ module.exports = {
   LinearTransition: {},
   CurvedTransition: {},
   Keyframe: class {},
+  FadeIn: animationSpec(),
+  SlideInLeft: animationSpec(),
+  SlideInRight: animationSpec(),
   Easing: { linear: (n) => n, ease: (n) => n, quad: (n) => n },
 };

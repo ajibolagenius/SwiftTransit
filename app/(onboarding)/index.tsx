@@ -65,7 +65,10 @@ export default function OnboardingScreen() {
         renderItem={({ item, index: i }) => (
           <View style={{ width: slideWidth || undefined }} className="flex-1">
             <View className="flex-1 items-center gap-7 px-11 pt-11">
-              <View className="w-full items-center justify-center rounded-3xl bg-brand-soft" style={{ height: 176 }}>
+              <View
+                className="w-full items-center justify-center rounded-3xl bg-brand-soft"
+                style={{ height: 176 }}
+              >
                 <IconTile icon={item.icon} size={88} />
               </View>
               <View className="items-center gap-3">

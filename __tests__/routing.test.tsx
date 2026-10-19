@@ -52,7 +52,7 @@ describe('route tree with role based gate', () => {
 
   // covers: AC-4
   it('lands a signed in customer on the customer home tab', async () => {
-    expect(await bootAs(signedIn('customer'), 'This screen is part of scope feature 6.')).toBe('(customer)');
+    expect(await bootAs(signedIn('customer'), 'Send anything, anywhere, anytime')).toBe('(customer)');
   });
 
   // covers: AC-4
@@ -72,7 +72,7 @@ describe('route tree with role based gate', () => {
   });
 
   it('keeps a customer who opens a courier link in the customer area', async () => {
-    expect(await bootAs(signedIn('customer'), 'This screen is part of scope feature 6.', '/earnings')).toBe(
+    expect(await bootAs(signedIn('customer'), 'Send anything, anywhere, anytime', '/earnings')).toBe(
       '(customer)',
     );
   });

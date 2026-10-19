@@ -78,6 +78,13 @@ const config: ExpoConfig = {
           'SwiftTransit uses your location to show couriers and routes near you. You can still book deliveries without it.',
       },
     ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'SwiftTransit uses your photos to attach package pictures to a delivery. You can book without a photo.',
+      },
+    ],
     '@maplibre/maplibre-react-native',
   ],
   experiments: { typedRoutes: true },

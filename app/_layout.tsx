@@ -1,6 +1,7 @@
 import '@/global.css';
 import '@/lib/i18n';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -14,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { routeGuards } from '@/features/auth/guards';
 import { readOnboardingSeen } from '@/features/auth/onboarding-storage';
+import { queryClient } from '@/lib/query';
 import { themeVars } from '@/theme/tokens';
 import { useScheme, useThemeColors } from '@/theme/use-theme';
 
@@ -34,9 +36,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider initialOnboardingSeen={seen}>
-        <RootNavigator />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider initialOnboardingSeen={seen}>
+          <RootNavigator />
+        </AuthProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
 }
