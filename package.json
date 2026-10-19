@@ -86,7 +86,8 @@
     },
     "moduleNameMapper": {
       "^react-native-reanimated$": "<rootDir>/mocks/react-native-reanimated.js",
-      "^react-native-reanimated/mock$": "<rootDir>/mocks/reanimated-mock.js"
+      "^react-native-reanimated/mock$": "<rootDir>/mocks/reanimated-mock.js",
+      "^https://esm\\.sh/@supabase/supabase-js@2$": "<rootDir>/mocks/supabase-js-esm.js"
     }
   }
 }
