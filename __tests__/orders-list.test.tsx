@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import type { ReactNode } from 'react';
 
@@ -53,7 +53,7 @@ function row(id: string, over: Record<string, unknown> = {}) {
 }
 
 // The rows the list answers with, newest first, exactly as the query orders them.
-let mockRows: Record<string, unknown>[] = [
+const mockRows: Record<string, unknown>[] = [
   row(ORDER_ID, { tracking_code: '7KQ2M4XJ', status: 'searching' }),
   row('00000000-0000-4000-8000-0000000000b2', {
     tracking_code: '3M9PQ1ZR',
@@ -62,13 +62,31 @@ let mockRows: Record<string, unknown>[] = [
     scheduled_at: todayAt(15, 30),
   }),
 ];
+
+// The whole table the paging mock answers from. The window test replaces this
+// with a full history; the default two row set keeps the other tests untouched.
+let mockTable = mockRows;
+// Every page window the list asked for, in order, so AC-1 can name page two.
+const mockWindows: { from: number; to: number }[] = [];
+// When true, the second page comes back empty, which ends the pagination.
+let mockNoNextPage = false;
+
+/** The whole table the paging mock answers from, newest first. */
+function tableRows(): Record<string, unknown>[] {
+  return mockTable;
+}
+
 let mockFailList = false;
 const mockListCalls: { statuses: string[] | null; from: number; to: number }[] = [];
-const mockRpc = jest.fn((name: string, args: Record<string, unknown>) =>
-  Promise.resolve({
-    data: name === 'change_order_status' ? { ...args, status: 'cancelled' } : null,
-    error: null,
-  }),
+const mockRpc = jest.fn(
+  (
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<{ data: unknown; error: { message: string } | null }> =>
+    Promise.resolve({
+      data: name === 'change_order_status' ? { ...args, status: 'cancelled' } : null,
+      error: null,
+    }),
 );
 
 // Supabase's builder is a thenable: `await` can come after any clause, in any
@@ -117,15 +135,26 @@ function mockChain(table: string): Chain {
     then(onFulfilled, onRejected) {
       if (table === 'orders' && mode === 'range') {
         mockListCalls.push({ statuses, ...pageWindow });
+        mockWindows.push(pageWindow);
       }
+      // Answer like PostgREST would: apply the status clause, then the window.
+      const wanted = statuses;
+      const filtered = wanted ? tableRows().filter((r) => wanted.includes(String(r.status))) : tableRows();
       const outcome =
         mode === 'single'
           ? mockSucceed(null)
           : mockFailList
             ? Promise.resolve({ data: null, error: { message: 'FATAL: connection timeout' } })
             : mode === 'limit'
-              ? mockSucceed([])
-              : mockSucceed(mockRows);
+              ? mockSucceed(filtered.slice(0, 3))
+              : mode === 'range' && table === 'orders'
+                ? mockSucceed(
+                    (mockNoNextPage && pageWindow.from > 0 ? [] : filtered).slice(
+                      pageWindow.from,
+                      pageWindow.to + 1,
+                    ),
+                  )
+                : mockSucceed(filtered);
       return outcome.then(onFulfilled, onRejected);
     },
   };
@@ -190,9 +219,11 @@ beforeEach(() => {
   queryClient.clear();
   mockAuth = { status: 'signed-in', session: null, role: 'customer' };
   mockFailList = false;
+  mockNoNextPage = false;
   mockListCalls.length = 0;
+  mockWindows.length = 0;
   mockRpc.mockClear();
-  mockRows = [
+  mockTable = [
     row(ORDER_ID, { tracking_code: '7KQ2M4XJ', status: 'searching' }),
     row('00000000-0000-4000-8000-0000000000b2', {
       tracking_code: '3M9PQ1ZR',
@@ -219,6 +250,59 @@ describe('the orders tab', () => {
     expect(screen.getAllByText(/Estimated Delivery/).length).toBeGreaterThan(0);
     // AC-1 paging: the first read is a 20 row window, newest first.
     expect(mockListCalls[0]).toEqual({ statuses: null, from: 0, to: PAGE_SIZE - 1 });
+  });
+
+  // covers: AC-1
+  it('appends page two with no duplicate and ends the list only when there is no next page', async () => {
+    // 25 orders, newest first. Page one is a full 20, so the pagination continues.
+    mockTable = Array.from({ length: 25 }, (_, i) =>
+      row(`00000000-0000-4000-8000-${String(i).padStart(12, '0')}`, {
+        tracking_code: `TEST${String(i).padStart(4, '0')}`,
+        status: i === 0 ? 'searching' : 'delivered',
+      }),
+    );
+    await open('/orders');
+    await screen.findByText('TN-TEST0000');
+
+    // Page one asked for rows 0 to 19 and the end of list line is not up yet,
+    // because there is a next page.
+    expect(mockWindows).toEqual([{ from: 0, to: PAGE_SIZE - 1 }]);
+    expect(screen.queryByText('That’s every order')).toBeNull();
+
+    // The FlatList carries no role and does not surface scroll as an event on
+    // its children, so reach the list host and invoke its end reached handler
+    // the way the scroll would.
+    const list = screen.getByText('TN-TEST0000').parent;
+    if (!list) throw new Error('the rendered card has no list host above it');
+    await act(async () => {
+      fireEvent(list, 'onEndReached', {
+        contentOffset: { x: 0, y: 10000 },
+        contentSize: { width: 400, height: 100000 },
+        layout: { width: 400, height: 800 },
+      });
+    });
+
+    // The next window asked for rows 20 to 39, not a repeat of the first.
+    await waitFor(() =>
+      expect(mockWindows).toEqual([
+        { from: 0, to: PAGE_SIZE - 1 },
+        { from: PAGE_SIZE, to: 2 * PAGE_SIZE - 1 },
+      ]),
+    );
+    // The five leftovers landed under the twenty, with no order twice. The list
+    // virtualizes what it renders, so the appended data is read from the query
+    // cache it renders from.
+    await waitFor(() => {
+      const cached = queryClient.getQueryCache().find({ queryKey: ['orders', 'all', USER_ID], exact: true })!
+        .state.data as { pages: { rows: { tracking_code: string }[] }[] };
+      const codes = cached.pages.flatMap((page) => page.rows.map((r) => r.tracking_code));
+      expect(codes).toHaveLength(25);
+      expect(new Set(codes).size).toBe(25);
+      expect(codes[20]).toBe('TEST0020');
+    });
+
+    // A short page means no next page: that is what turns the footer on.
+    expect(await screen.findByText('That’s every order')).toBeTruthy();
   });
 
   // covers: AC-3, AC-15
@@ -277,11 +361,28 @@ describe('the orders tab', () => {
 
   // covers: AC-14
   it('shows the book a delivery state when the customer has never ordered', async () => {
-    mockRows = [];
+    mockTable = [];
     await open('/orders');
 
     expect(await screen.findByText('No deliveries yet')).toBeTruthy();
     expect(screen.getByText('Book your first one and it shows up here.')).toBeTruthy();
+  });
+
+  // covers: AC-2, AC-14
+  it('shows the no match state, not the book a delivery state, when a filter empties the list', async () => {
+    // The history holds one searching order: Active can show it, Past cannot.
+    mockTable = [row(ORDER_ID, { tracking_code: '7KQ2M4XJ', status: 'searching' })];
+    await open('/orders');
+    await screen.findByText('TN-7KQ2M4XJ');
+
+    await press(screen.getByText('Past Orders'));
+
+    expect(await screen.findByText('No order matches that')).toBeTruthy();
+    expect(screen.queryByText('No deliveries yet')).toBeNull();
+    expect(screen.getByText('Clear search and filter')).toBeTruthy();
+
+    await press(screen.getByText('Clear search and filter'));
+    expect(await screen.findByText('TN-7KQ2M4XJ')).toBeTruthy();
   });
 
   // covers: AC-14
@@ -316,6 +417,37 @@ describe('the orders tab', () => {
     });
   });
 
+  // covers: AC-9, AC-14
+  it('returns the card sheet to the clean menu after a refused cancel', async () => {
+    mockRpc.mockImplementation(
+      (
+        name: string,
+        _args: Record<string, unknown>,
+      ): Promise<{ data: unknown; error: { message: string } | null }> =>
+        name === 'change_order_status'
+          ? Promise.resolve({ data: null, error: { message: 'policy refused' } })
+          : Promise.resolve({ data: null, error: null }),
+    );
+    await open('/orders');
+
+    const [firstMenu] = await screen.findAllByLabelText('Order actions');
+    await press(firstMenu);
+    await press(screen.getByRole('button', { name: 'Cancel delivery' }));
+    await press(screen.getAllByRole('button', { name: 'Cancel delivery' }).pop());
+
+    // A refusal with no server code reads as the offline line inside the sheet.
+    expect(
+      await screen.findByText('You appear to be offline. Check your connection and try again.'),
+    ).toBeTruthy();
+
+    // Leaving the sheet clears the refusal, so the next open is a clean menu,
+    // not the stale error waiting on the customer.
+    await press(screen.getByRole('link', { name: 'Keep the delivery' }));
+    await press(firstMenu);
+    expect(await screen.findByText('Copy tracking code')).toBeTruthy();
+    expect(screen.queryByText('You appear to be offline. Check your connection and try again.')).toBeNull();
+  });
+
   // covers: AC-10
   it('copies the tracking code from the card menu', async () => {
     const clipboard = require('expo-clipboard') as { setStringAsync: jest.Mock };
@@ -342,7 +474,7 @@ describe('home active deliveries', () => {
 
   // covers: AC-12
   it('hides the section when there is nothing active', async () => {
-    mockRows = [];
+    mockTable = [];
     await open('/');
 
     await screen.findByText('Send anything, anywhere, anytime');

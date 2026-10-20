@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import type { ReactNode } from 'react';
 
@@ -69,17 +69,25 @@ let mockProfile: Record<string, unknown> | null = {
 };
 let mockVehicle: Record<string, unknown> | null = { vehicle_type: 'bike', vehicle_number: 'KST-482-XJ' };
 let mockFailDetail = false;
+// The id the last `orders` read asked for. The mock answers like RLS would:
+// a row only exists for the id that was seeded, every other id reads empty.
+let mockAskedId: string | null = null;
 
 /** Every `eq(column, value)` the reads asked for, so AC-4 can name the id read. */
 const mockEqCalls: { table: string; column: string; value: unknown }[] = [];
-const mockRpc = jest.fn((name: string, args: Record<string, unknown>) => {
-  mockRpcCalls.push({ name, args });
-  if (name === 'courier_vehicle') {
-    // The function returns a table, so a real RPC answer is an array of rows.
-    return Promise.resolve({ data: mockVehicle ? [mockVehicle] : [], error: null });
-  }
-  return Promise.resolve({ data: { status: 'cancelled' }, error: null });
-});
+const mockRpc = jest.fn(
+  (
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<{ data: unknown; error: { message: string } | null }> => {
+    mockRpcCalls.push({ name, args });
+    if (name === 'courier_vehicle') {
+      // The function returns a table, so a real RPC answer is an array of rows.
+      return Promise.resolve({ data: mockVehicle ? [mockVehicle] : [], error: null });
+    }
+    return Promise.resolve({ data: { status: 'cancelled' }, error: null });
+  },
+);
 const mockRpcCalls: { name: string; args: Record<string, unknown> }[] = [];
 
 type Mode = 'range' | 'limit' | 'single';
@@ -99,7 +107,11 @@ function resolveRead(table: string, mode: Mode) {
   if (table === 'orders') {
     if (mockFailDetail)
       return Promise.resolve({ data: null, error: { message: 'FATAL: connection timeout' } });
-    return Promise.resolve({ data: mode === 'single' ? mockOrderRow : [mockOrderRow], error: null });
+    const row = mockAskedId === null || mockAskedId === ORDER_ID ? mockOrderRow : null;
+    return Promise.resolve({
+      data: mode === 'single' ? row : row ? [row] : [],
+      error: null,
+    });
   }
   if (table === 'order_events') return Promise.resolve({ data: mockEventRows, error: null });
   if (table === 'profiles') return Promise.resolve({ data: mockProfile, error: null });
@@ -112,6 +124,7 @@ function mockChain(table: string): Chain {
     select: () => chain,
     eq: (column, value) => {
       mockEqCalls.push({ table, column, value });
+      if (table === 'orders' && column === 'id') mockAskedId = String(value);
       return chain;
     },
     in: () => chain,
@@ -202,6 +215,7 @@ beforeEach(() => {
   mockVehicle = { vehicle_type: 'bike', vehicle_number: 'KST-482-XJ' };
   mockEqCalls.length = 0;
   mockRpcCalls.length = 0;
+  mockAskedId = null;
   mockRpc.mockClear();
   mockMapProps.mockClear();
 });
@@ -394,22 +408,60 @@ describe('the order detail', () => {
     await screen.findByText('TN-7KQ2M4XJ');
 
     // A realtime style invalidation refetches the row, and this time the read
-    // fails. The retry timer only advances under waitFor (fake timers), so
-    // the settled error state is waited for, not awaited. The cached order
-    // stays on screen; the full screen error state is only for a read that
-    // never produced data.
+    // fails. The retry timer is fake timed, so it is advanced inside the same
+    // awaited act: the refetch settles to error without its scope leaking past
+    // the test. The cached order stays on screen; the full screen error state
+    // is only for a read that never produced data.
     mockFailDetail = true;
-    act(() => {
-      void queryClient.refetchQueries({ queryKey: ['order', ORDER_ID] });
+    await act(async () => {
+      const refetch = queryClient.refetchQueries({ queryKey: ['order', ORDER_ID] });
+      await jest.advanceTimersByTimeAsync(5_000);
+      await refetch;
     });
 
-    await waitFor(() =>
-      expect(
-        queryClient.getQueryCache().find({ queryKey: ['order', ORDER_ID], exact: true })?.state.status,
-      ).toBe('error'),
-    );
+    expect(
+      queryClient.getQueryCache().find({ queryKey: ['order', ORDER_ID], exact: true })?.state.status,
+    ).toBe('error');
 
     expect(screen.queryByText(/load your orders/)).toBeNull();
     expect(screen.getByText('TN-7KQ2M4XJ')).toBeTruthy();
-  }, 15000);
+  });
+
+  // covers: AC-9
+  it('clears a refused cancel once the dialog is dismissed', async () => {
+    mockRpc.mockImplementation(
+      (name: string): Promise<{ data: unknown; error: { message: string } | null }> =>
+        name === 'change_order_status'
+          ? Promise.resolve({ data: null, error: { message: 'policy refused' } })
+          : Promise.resolve({ data: null, error: null }),
+    );
+    await open(ORDER_ID);
+    await press(await screen.findByRole('button', { name: 'Cancel delivery' }));
+    await press(screen.getAllByRole('button', { name: 'Cancel delivery' }).pop());
+
+    // The refusal shows inside the open dialog.
+    expect(
+      await screen.findByText('You appear to be offline. Check your connection and try again.'),
+    ).toBeTruthy();
+
+    // Dismissing resets the mutation state, so reopening shows the plain
+    // confirm again, not the stale refusal.
+    await press(screen.getByRole('link', { name: 'Keep the delivery' }));
+    await press(await screen.findByRole('button', { name: 'Cancel delivery' }));
+    expect(await screen.findByText('Cancel this delivery?')).toBeTruthy();
+    expect(screen.queryByText('You appear to be offline. Check your connection and try again.')).toBeNull();
+  });
+
+  // covers: AC-14, AC-4
+  it('shows the same not found state for a blank id, without ever revealing a row', async () => {
+    // A blank id is not a route match for an order. Use a whitespace id: the
+    // read goes out, matches nothing, and the screen must land on the very
+    // same not found copy someone else's order gets.
+    await open('%20');
+
+    expect(await screen.findByText('We can’t find that order')).toBeTruthy();
+    expect(screen.getByText('It may belong to another account, or it no longer exists.')).toBeTruthy();
+    expect(screen.queryByText(/load your orders/)).toBeNull();
+    expect(mockEqCalls).toContainEqual({ table: 'orders', column: 'id', value: ' ' });
+  });
 });

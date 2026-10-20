@@ -121,7 +121,7 @@ Orders tab with all / active / past filters, tracking-number search, home "Activ
    - [x] Realtime helper wired into list, detail and events (AC-11)
    - [x] Home "Active deliveries", booking confirmation jump, empty, error, expired and not-found states, i18n, accessibility, tests (AC-12, AC-13, AC-14, AC-15)
 - [ ] Verify it: `/check verify orders list & order detail`
-- [ ] Test it: `/test orders list & order detail`
+- [x] Test it: `/test orders list & order detail`
 Spec [0006](../specs/0006-orders-list-and-detail.md) · code in `features/orders/`, `app/(customer)/(tabs)/orders.tsx`, `app/(customer)/orders/[id].tsx`, `app/(customer)/(tabs)/index.tsx`, `components/ui/status-timeline.tsx`, `lib/supabase/realtime.ts`, `supabase/` (migration, `.test/95_courier_vehicle.sql`), `__tests__/orders-*.test.tsx`
 
 ## Slice 2: Courier can take a job
