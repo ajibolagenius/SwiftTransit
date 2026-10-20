@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Plus } from 'lucide-react-native';
 
 import { sizedNodes } from '@/testing/sized-nodes';
 import { IconButton } from '@/components/ui/icon-button';
+import { icons } from '@/components/ui/rune-icon';
 
 describe('IconButton', () => {
   // covers: AC-5
@@ -13,7 +13,7 @@ describe('IconButton', () => {
 
   // covers: AC-5
   it('adds no announced node for the icon itself', async () => {
-    await render(<IconButton icon={Plus} accessibilityLabel="Add package" />);
+    await render(<IconButton icon={icons.Plus} accessibilityLabel="Add package" />);
     expect(screen.queryAllByRole('image')).toHaveLength(0);
     expect(screen.getAllByRole('button')).toHaveLength(1);
   });

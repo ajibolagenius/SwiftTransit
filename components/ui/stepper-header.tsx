@@ -1,8 +1,8 @@
-import { Check } from 'lucide-react-native';
 import { Text, View } from 'react-native';
 
 import { cn } from './cn';
 import { useThemeColors } from '@/theme/use-theme';
+import { icons } from '@/components/ui/rune-icon';
 
 // DESIGN.md stepper-header: brand-soft card, "Step N of 6", step name, and dots.
 // done = success check, current = filled brand square, upcoming = outline circle.
@@ -36,7 +36,7 @@ export function StepperHeader({
       <View className="flex-row items-center gap-2" accessibilityElementsHidden>
         {Array.from({ length: total }, (_, i) => {
           const n = i + 1;
-          if (n < step) return <Check key={n} size={14} strokeWidth={2} color={colors.bg.success} />;
+          if (n < step) return <icons.Check key={n} size={14} strokeWidth={2} color={colors.bg.success} />;
           if (n === step) return <View key={n} className="h-2 w-2 bg-interactive-primary" />;
           return <View key={n} className="h-2 w-2 rounded-full border border-strong" />;
         })}

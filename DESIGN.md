@@ -383,5 +383,5 @@ Follow the `animate-expo` and `emil-design-eng` skills. Defaults: press feedback
 - Don't introduce colours, sizes or radii outside these tokens; extend this file first.
 - Don't use `accent-amber` or `green-500` for text on white (fails contrast).
 - Don't stack modals while a courier is navigating.
-- Don't use emoji as icons; use one icon set at 20/24 px, 1.5 stroke. Lucide (`lucide-react-native`) is the working choice; the designs look closer to Iconsax, so confirm the Figma icon library first.
+- Don't use emoji as icons. Icons are RuneIcons "Glass" edition (`runeicons` npm package), rendered through `components/ui/rune-icon.tsx` from the generated set in `assets/rune-glass.generated.ts` (rebuild: `node scripts/build-rune-icons.mjs`). Glass glyphs carry fixed grey/white gradients at 20/24 px; where the store has no close glass shape (chevrons, plus, plain check/x, radio circle, truck, basket outline) the same library's `normal` 1.5-stroke style is used so the icon still takes `text/` colours. Add glyphs by extending the mapping in the build script, never by hand-editing the generated file.
 - Don't put generic AI-slop flourishes (gradients, glassmorphism, oversized shadows) on top of this calm system.

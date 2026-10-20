@@ -1,14 +1,14 @@
-import type { LucideIcon } from 'lucide-react-native';
 import { Tabs, useRouter, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { TabBar } from '@/components/ui/tab-bar';
 import type en from '@/locales/en.json';
 import { useThemeColors } from '@/theme/use-theme';
+import type { IconComponent } from '@/components/ui/rune-icon';
 
 type ScreenKey = keyof (typeof en)['screens'];
 
-type TabConfig = { name: string; title: ScreenKey; icon: LucideIcon };
+type TabConfig = { name: string; title: ScreenKey; icon: IconComponent };
 
 // Root tabs with the DESIGN.md custom bar and raised centre action.
 export function RoleTabs({ tabs, fab }: { tabs: TabConfig[]; fab?: { label: ScreenKey; route: string } }) {

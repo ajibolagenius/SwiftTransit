@@ -1,11 +1,10 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { MoreVertical, Package } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { IconButton } from './icon-button';
 import { IconTile } from './icon-tile';
 import { usePressScale } from './use-press-scale';
+import { type IconComponent, icons } from '@/components/ui/rune-icon';
 
 // DESIGN.md order-card: quiet surface, package icon, title, tracking/ETA pairs, overflow menu.
 export function OrderCard({
@@ -14,7 +13,7 @@ export function OrderCard({
   trackingLabel,
   etaLabel,
   etaValue,
-  icon = Package,
+  icon = icons.Package,
   overflowLabel,
   onPress,
   onOverflowPress,
@@ -25,7 +24,7 @@ export function OrderCard({
   trackingLabel: string;
   etaLabel: string;
   etaValue: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   overflowLabel?: string;
   onPress?: () => void;
   onOverflowPress?: () => void;
@@ -52,7 +51,7 @@ export function OrderCard({
           </View>
           {onOverflowPress && overflowLabel ? (
             <IconButton
-              icon={MoreVertical}
+              icon={icons.MoreVertical}
               accessibilityLabel={overflowLabel}
               size={44}
               onPress={onOverflowPress}

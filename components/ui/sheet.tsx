@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { Dimensions, Modal, Pressable, Text, View } from 'react-native';
@@ -8,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconTile } from './icon-tile';
 import { useReduceMotion } from './use-reduce-motion';
 import { useThemeColors } from '@/theme/use-theme';
+import type { IconComponent } from '@/components/ui/rune-icon';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -25,7 +25,7 @@ export function Sheet({
   onDismiss: () => void;
   title: string;
   dismissLabel: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   children?: ReactNode;
 }) {
   return (
@@ -49,7 +49,7 @@ function SheetBody({
   onDismiss: () => void;
   title: string;
   dismissLabel: string;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   children?: ReactNode;
 }) {
   const insets = useSafeAreaInsets();

@@ -1,15 +1,14 @@
-import { Banknote, House, Package, User } from 'lucide-react-native';
-
 import { RoleTabs } from '@/components/role-tabs';
+import { icons } from '@/components/ui/rune-icon';
 
 export default function CourierTabs() {
   return (
     <RoleTabs
       tabs={[
-        { name: 'index', title: 'home', icon: House },
-        { name: 'deliveries', title: 'deliveries', icon: Package },
-        { name: 'earnings', title: 'earnings', icon: Banknote },
-        { name: 'profile', title: 'profile', icon: User },
+        { name: 'index', title: 'home', icon: icons.House },
+        { name: 'deliveries', title: 'deliveries', icon: icons.Package },
+        { name: 'earnings', title: 'earnings', icon: icons.Banknote },
+        { name: 'profile', title: 'profile', icon: icons.User },
       ]}
     />
   );

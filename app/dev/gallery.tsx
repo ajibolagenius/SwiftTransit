@@ -1,20 +1,3 @@
-import {
-  Bell,
-  Bike,
-  Clock,
-  GlassWater,
-  House,
-  MapPin,
-  MessageCircle,
-  Package,
-  Phone,
-  Send,
-  Truck,
-  User,
-  Wallet,
-  ClipboardList,
-  X,
-} from 'lucide-react-native';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
@@ -35,6 +18,8 @@ import { SelectCard } from '@/components/ui/select-card';
 import { Sheet } from '@/components/ui/sheet';
 import { StepperHeader } from '@/components/ui/stepper-header';
 import { TabBar } from '@/components/ui/tab-bar';
+import { icons } from '@/components/ui/rune-icon';
+import { RUNE_ICONS, type IconName } from '@/assets/rune-glass.generated';
 
 // Dev-only design system gallery (scope feature 4). Reached from the onboarding placeholder in dev builds.
 export default function Screen() {
@@ -60,7 +45,7 @@ export default function Screen() {
     <SafeAreaView className="flex-1 bg-primary">
       {/* DESIGN.md navigation: custom header row, 44 px back button with a centred title. */}
       <View className="flex-row items-center px-7 py-3">
-        <IconButton icon={House} accessibilityLabel={t('gallery.back')} onPress={() => router.back()} />
+        <IconButton icon={icons.House} accessibilityLabel={t('gallery.back')} onPress={() => router.back()} />
         <Text
           accessibilityRole="header"
           className="absolute inset-x-0 text-center font-sans text-h4 text-primary"
@@ -84,6 +69,20 @@ export default function Screen() {
           <Text className="font-sans text-body-sm text-tertiary">{t('gallery.introHint')}</Text>
         </View>
 
+        <Section label={t('gallery.icons')}>
+          <View className="flex-row flex-wrap">
+            {(Object.keys(RUNE_ICONS) as IconName[]).map((name) => {
+              const Icon = icons[name];
+              return (
+                <View key={name} className="w-1/4 items-center gap-1 py-3">
+                  <Icon size={32} />
+                  <Text className="font-sans text-label-sm text-tertiary">{name}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </Section>
+
         <Section label={t('gallery.buttons')}>
           <Button loading={loadingDemo} onPress={() => setLoadingDemo((v) => !v)}>
             {t('gallery.primary')}
@@ -98,14 +97,14 @@ export default function Screen() {
         <Section label={t('gallery.iconButtons')}>
           <View className="flex-row gap-5">
             <IconButton accessibilityLabel={t('gallery.ariaBack')} />
-            <IconButton icon={Bell} accessibilityLabel={t('gallery.ariaNotifications')} />
-            <IconButton icon={Phone} accessibilityLabel={t('gallery.ariaCall')} />
-            <IconButton icon={MessageCircle} accessibilityLabel={t('gallery.ariaChat')} />
+            <IconButton icon={icons.Bell} accessibilityLabel={t('gallery.ariaNotifications')} />
+            <IconButton icon={icons.Phone} accessibilityLabel={t('gallery.ariaCall')} />
+            <IconButton icon={icons.MessageCircle} accessibilityLabel={t('gallery.ariaChat')} />
           </View>
         </Section>
 
         <Section label={t('gallery.inputs')}>
-          <Input label={t('gallery.nameLabel')} value={name} onChangeText={setName} icon={User} />
+          <Input label={t('gallery.nameLabel')} value={name} onChangeText={setName} icon={icons.User} />
           <Input
             label={t('gallery.noteLabel')}
             placeholder={t('gallery.notePlaceholder')}
@@ -136,7 +135,7 @@ export default function Screen() {
           <View className="flex-row gap-4">
             <SelectCard
               className="flex-1"
-              icon={Bike}
+              icon={icons.Bike}
               title={t('gallery.bikeTitle')}
               subtitle={t('gallery.bikeSubtitle')}
               selected={vehicle === 'bike'}
@@ -144,7 +143,7 @@ export default function Screen() {
             />
             <SelectCard
               className="flex-1"
-              icon={Truck}
+              icon={icons.Truck}
               title={t('gallery.vanTitle')}
               subtitle={t('gallery.vanSubtitle')}
               selected={vehicle === 'van'}
@@ -165,14 +164,14 @@ export default function Screen() {
 
         <Section label={t('gallery.chips')}>
           <View className="flex-row flex-wrap gap-3">
-            <Chip icon={MapPin}>{t('gallery.chipDistance')}</Chip>
-            <Chip icon={GlassWater} tone="amber">
+            <Chip icon={icons.MapPin}>{t('gallery.chipDistance')}</Chip>
+            <Chip icon={icons.GlassWater} tone="amber">
               {t('gallery.chipFragile')}
             </Chip>
-            <Chip icon={Package} tone="neutral">
+            <Chip icon={icons.Package} tone="neutral">
               {t('gallery.chipSize')}
             </Chip>
-            <Chip icon={Clock}>{t('gallery.chipTime')}</Chip>
+            <Chip icon={icons.Clock}>{t('gallery.chipTime')}</Chip>
           </View>
         </Section>
 
@@ -211,10 +210,10 @@ export default function Screen() {
       <View className="absolute inset-x-0 bottom-0">
         <TabBar
           items={[
-            { key: 'index', label: t('gallery.tabHome'), icon: House },
-            { key: 'orders', label: t('gallery.tabOrders'), icon: ClipboardList },
-            { key: 'wallet', label: t('gallery.tabWallet'), icon: Wallet },
-            { key: 'profile', label: t('gallery.tabProfile'), icon: User },
+            { key: 'index', label: t('gallery.tabHome'), icon: icons.House },
+            { key: 'orders', label: t('gallery.tabOrders'), icon: icons.ClipboardList },
+            { key: 'wallet', label: t('gallery.tabWallet'), icon: icons.Wallet },
+            { key: 'profile', label: t('gallery.tabProfile'), icon: icons.User },
           ]}
           activeKey={activeTab}
           onSelect={setActiveTab}
@@ -227,7 +226,7 @@ export default function Screen() {
         onDismiss={() => setSheetOpen(false)}
         title={t('gallery.sheetTitle')}
         dismissLabel={t('gallery.sheetDismiss')}
-        icon={Send}
+        icon={icons.Send}
       >
         <View className="gap-4">
           <Button onPress={() => setSheetOpen(false)}>{t('gallery.sheetSend')}</Button>
@@ -236,7 +235,7 @@ export default function Screen() {
           </Button>
           <View className="flex-row justify-center pt-2">
             <IconButton
-              icon={X}
+              icon={icons.X}
               accessibilityLabel={t('gallery.sheetDismiss')}
               onPress={() => setSheetOpen(false)}
             />

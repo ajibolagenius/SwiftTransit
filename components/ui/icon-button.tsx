@@ -1,18 +1,17 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { ChevronLeft } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { cn } from './cn';
 import { usePressScale } from './use-press-scale';
 import { useThemeColors } from '@/theme/use-theme';
+import { type IconComponent, icons } from '@/components/ui/rune-icon';
 
 // DESIGN.md button-icon: 44 px circle with a border; the 44 pt target is the platform minimum, not a spacing step.
 const ICON_BUTTON_SIZE = 44;
 const ICON_SIZE = 20; // DESIGN.md: one icon set at 20/24 px, 1.5 stroke.
 
 export function IconButton({
-  icon: Icon = ChevronLeft,
+  icon: Icon = icons.ChevronLeft,
   accessibilityLabel,
   onPress,
   disabled = false,
@@ -21,7 +20,7 @@ export function IconButton({
   tone = 'default',
   className,
 }: {
-  icon?: LucideIcon;
+  icon?: IconComponent;
   accessibilityLabel: string;
   onPress?: () => void;
   disabled?: boolean;

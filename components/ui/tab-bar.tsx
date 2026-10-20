@@ -1,5 +1,3 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { ChevronsUp } from 'lucide-react-native';
 import { Platform, Pressable, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,13 +6,14 @@ import { cn } from './cn';
 import { usePressScale } from './use-press-scale';
 import { palette } from '@/theme/tokens';
 import { useScheme, useThemeColors } from '@/theme/use-theme';
+import { type IconComponent, icons } from '@/components/ui/rune-icon';
 
 // DESIGN.md navigation: root tabs with a raised centre action. The FAB is 52 px on the brand surface;
 // shadows are reserved for floating elements and only in light mode (dark uses the border instead).
 const FAB_SIZE = 52;
 const FAB_RISE = 18;
 
-export type TabBarItem = { key: string; label: string; icon: LucideIcon };
+export type TabBarItem = { key: string; label: string; icon: IconComponent };
 
 export function TabBar({
   items,
@@ -105,7 +104,7 @@ function Fab({ label, onPress }: { label: string; onPress: () => void }) {
           ]}
           className="items-center justify-center rounded-full bg-interactive-primary"
         >
-          <ChevronsUp
+          <icons.ChevronsUp
             size={24}
             strokeWidth={1.5}
             color={colors.text['on-brand']}

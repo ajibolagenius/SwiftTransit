@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Mail } from 'lucide-react-native';
 
 import { Input } from '@/components/ui/input';
+import { icons } from '@/components/ui/rune-icon';
 
 describe('Input', () => {
   // covers: AC-1, AC-6
@@ -57,7 +57,7 @@ describe('Input', () => {
   });
 
   it('keeps the leading icon out of the accessibility tree', async () => {
-    await render(<Input label="Email" icon={Mail} value="" onChangeText={jest.fn()} />);
+    await render(<Input label="Email" icon={icons.Mail} value="" onChangeText={jest.fn()} />);
     expect(screen.queryAllByRole('image')).toHaveLength(0);
   });
 });
