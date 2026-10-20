@@ -2,7 +2,7 @@
 // Deletes package-photos objects older than 7 days that no order references.
 // Service-role only; scheduled by pg_cron (supabase/functions/_shared/cron-definitions.sql).
 
-import { Client } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const BUCKET = 'package-photos';
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     return new Response('unauthorized', { status: 401 });
   }
 
-  const admin = new Client(Deno.env.get('SUPABASE_URL')!, serviceKey!, {
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey!, {
     auth: { persistSession: false },
   });
 

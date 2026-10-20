@@ -10,6 +10,9 @@ jest.mock('@/features/auth/auth-provider', () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => children,
   useAuth: () => mockAuth,
 }));
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
 jest.mock('@/lib/env', () => ({
   env: {
     EXPO_PUBLIC_MAP_STYLE_LIGHT: 'https://tiles.openfreemap.org/styles/positron',
@@ -18,6 +21,11 @@ jest.mock('@/lib/env', () => ({
 }));
 jest.mock('../global.css', () => ({})); // NativeWind's CSS is compiled by Metro, not Jest
 jest.mock('@maplibre/maplibre-react-native', () => ({ Map: () => null, Camera: () => null }));
+// Registration pulls in Supabase (and its encrypted SQLite storage), which the router test
+// never exercises. A stub keeps that native module out of the route tree render.
+jest.mock('@/lib/supabase', () => ({
+  supabase: { auth: { updateUser: jest.fn() }, rpc: jest.fn() },
+}));
 
 const signedIn = (role: 'customer' | 'courier' | null): AuthState => ({
   status: 'signed-in',
@@ -25,56 +33,60 @@ const signedIn = (role: 'customer' | 'courier' | null): AuthState => ({
   role,
 });
 
-// Boots the real app/ route tree as the given user and reports where they land: the top
-// level route group and the screen title. (RNTL 14 renders async, and the router store only
-// reports the top level group here, so the title pins the exact screen.)
-async function bootAs(state: AuthState, initialUrl = '/') {
+// Boots the real app/ route tree as the given user and reports where they land: the top level
+// route group, plus the marker text of the screen that rendered. The marker pins the exact
+// screen (the router store only reports the top level group here).
+async function bootAs(state: AuthState, marker: string, initialUrl = '/') {
   mockAuth = state;
   const router = renderRouter('./app', { initialUrl });
   await router;
-  const header = await screen.findByRole('header');
-  return { area: router.getSegments()[0], title: header.props.children as string };
+  await screen.findByText(marker);
+  return router.getSegments()[0];
 }
 
 describe('route tree with role based gate', () => {
   // covers: AC-4
   it('lands a signed out user on onboarding', async () => {
-    expect(await bootAs({ status: 'signed-out' })).toEqual({ area: '(onboarding)', title: 'Onboarding' });
+    expect(await bootAs({ status: 'signed-out' }, 'Deliver Anything. Anytime')).toBe('(onboarding)');
   });
 
   // covers: AC-4
   it('lands a signed in customer on the customer home tab', async () => {
-    expect(await bootAs(signedIn('customer'))).toEqual({ area: '(customer)', title: 'Home' });
+    expect(await bootAs(signedIn('customer'), 'Send anything, anywhere, anytime')).toBe('(customer)');
   });
 
   // covers: AC-4
   it('lands a signed in courier on the courier home tab', async () => {
-    expect(await bootAs(signedIn('courier'))).toEqual({ area: '(courier)', title: 'Home' });
+    expect(await bootAs(signedIn('courier'), 'This screen is part of scope feature 8.')).toBe('(courier)');
   });
 
   // covers: AC-4
   it('lands a signed in user without a profile on registration', async () => {
-    expect(await bootAs(signedIn(null))).toEqual({ area: '(auth)', title: 'Tell us about yourself' });
+    expect(await bootAs(signedIn(null), 'Tell Us About Yourself')).toBe('(auth)');
   });
 
   it('sends a signed out user who opens a customer link to onboarding', async () => {
-    expect(await bootAs({ status: 'signed-out' }, '/orders')).toEqual({
-      area: '(onboarding)',
-      title: 'Onboarding',
-    });
+    expect(await bootAs({ status: 'signed-out' }, 'Deliver Anything. Anytime', '/orders')).toBe(
+      '(onboarding)',
+    );
   });
 
   it('keeps a customer who opens a courier link in the customer area', async () => {
-    expect(await bootAs(signedIn('customer'), '/earnings')).toEqual({ area: '(customer)', title: 'Home' });
+    expect(await bootAs(signedIn('customer'), 'Send anything, anywhere, anytime', '/earnings')).toBe(
+      '(customer)',
+    );
   });
 
   it('keeps a courier who opens a customer link in the courier area', async () => {
-    expect(await bootAs(signedIn('courier'), '/wallet')).toEqual({ area: '(courier)', title: 'Home' });
+    expect(await bootAs(signedIn('courier'), 'This screen is part of scope feature 8.', '/wallet')).toBe(
+      '(courier)',
+    );
   });
 
   it('renders no screen while the session is loading (splash stays up)', async () => {
     mockAuth = { status: 'loading' };
     await renderRouter('./app');
-    expect(screen.queryByRole('header')).toBeNull();
+    expect(screen.queryByText('Tell Us About Yourself')).toBeNull();
+    expect(screen.queryByText('Welcome to SwiftTransit')).toBeNull();
   });
 });

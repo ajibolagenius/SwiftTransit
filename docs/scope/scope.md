@@ -15,8 +15,8 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 2 | Coding standards & tooling | Foundation | planned |
 | 3 | Data model & security | Foundation | done |
 | 4 | Design system & UI primitives | Foundation | done |
-| 5 | Onboarding & authentication | Slice 1 | planned |
-| 6 | Create a delivery | Slice 1 | planned |
+| 5 | Onboarding & authentication | Slice 1 | in-progress |
+| 6 | Create a delivery | Slice 1 | in-progress |
 | 7 | Orders list & order detail | Slice 1 | planned |
 | 8 | Courier application & go online | Slice 2 | planned |
 | 9 | Delivery requests & lifecycle | Slice 2 | planned |
@@ -78,15 +78,37 @@ code in `components/ui`, `components/role-tabs.tsx`, `app/dev/gallery.tsx`, `the
 
 ## Slice 1: Customer can book and see a delivery
 
-### 5. Onboarding & authentication · needs a decision · GA
+### 5. Onboarding & authentication · in-progress · GA
 Onboarding carousel, welcome screen, phone and email OTP, Google and Apple sign-in, registration with account type, location permission sheet.
 **Done when:** a new user can sign up with any of the four methods, verify OTP (with invalid-code and resend timer states), choose customer or courier, and lands in the right tabs; a returning user skips onboarding.
-- [ ] Design it (spec): `/architect onboarding & authentication`
+- [x] Design it (spec): `/architect onboarding & authentication` → [0003](../specs/0003-onboarding-authentication.md)
+- [x] Build it: `/develop onboarding & authentication`
+   - [x] Deps and the phone OTP tracer thread (AC-2, AC-5, AC-6, AC-7)
+   - [x] Dashboard configuration and the send-sms Edge Function (AC-2, AC-4)
+   - [x] Carousel with the once-per-install gate, email path, Google and Apple OAuth, location sheet (AC-1, AC-3, AC-4, AC-7, AC-11, AC-12)
+   - [x] Failure states: offline, expired session, rate limit, failed profile read (AC-8, AC-9, AC-10)
+   - [x] i18n, themes, accessibility, legal links, tests, dev stub intact (AC-13, AC-14)
+- [ ] Verify it: `/check verify onboarding & authentication`
+- [x] Test it: `/test onboarding & authentication`
+- [x] Review it (fresh model): `/check review onboarding & authentication`
+- [x] Document it: `/document onboarding & authentication`
+Spec [0003](../specs/0003-onboarding-authentication.md) · code in `features/auth/`, `app/(auth)/`, `app/(onboarding)/`, `app/auth/callback.tsx`, `supabase/functions/send-sms/`
 
-### 6. Create a delivery · needs a decision
+### 6. Create a delivery · in-progress · GA
 The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step wizard (type, pickup, drop-off, receiver, package, schedule), order summary with price breakdown, mock payment, booking confirmation with tracking number.
 **Done when:** a customer completes the wizard using map pick, address search or saved address, sees the price before paying, pays with the mock card or wallet, and gets a tracking number; the order exists in the database as `searching`.
-- [ ] Design it (spec): `/architect create a delivery`
+- [x] Design it (spec): `/architect create a delivery` → [0005](../specs/0005-create-a-delivery.md)
+- [x] Build it: `/develop create a delivery`
+   - [x] Deps, the price rule in SQL, and the first priced summary (AC-9, AC-10, AC-22, AC-23)
+   - [x] Geo function, search hook, wizard shell and step guard (AC-4, AC-8, AC-14, AC-19)
+   - [x] The six steps: type, locations, receiver, package, schedule (AC-2, AC-3, AC-5, AC-6, AC-7)
+   - [x] Summary, mock payment, submit flow, confirmation and saved address (AC-11, AC-12, AC-13, AC-15, AC-16, AC-18)
+   - [x] Entry points, session and expiry handling, i18n, accessibility, tests (AC-1, AC-17, AC-20, AC-21, AC-22, AC-23)
+- [ ] Verify it: `/check verify create a delivery`
+- [x] Test it: `/test create a delivery`
+- [x] Review it (fresh model): `/check review create a delivery`
+- [x] Document it: `/document create a delivery`
+Spec [0005](../specs/0005-create-a-delivery.md) · code in `features/deliveries/`, `app/(customer)/new-delivery/`, `lib/` (geo, money, payments, query, error-label), `supabase/` (migrations, `.test`, `functions/geo`), `locales/en.json`
 
 ### 7. Orders list & order detail
 Orders tab with all / active / past filters, tracking-number search, home "Active deliveries", order detail with status timeline.

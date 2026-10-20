@@ -4,7 +4,8 @@ import { useAuth } from '@/features/auth/auth-provider';
 import { routeGuards } from '@/features/auth/guards';
 
 export default function AuthLayout() {
-  const guard = routeGuards(useAuth());
+  const auth = useAuth();
+  const guard = routeGuards(auth, auth.onboardingSeen);
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {/* Signed in without a profile: only registration is reachable, so the stack opens there. */}

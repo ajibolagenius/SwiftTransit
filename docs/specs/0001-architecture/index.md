@@ -54,7 +54,7 @@ Build with development builds (not Expo Go, because MapLibre and native sign-in 
 | Local UI state | Zustand 5 (new-delivery wizard draft only) | Draft spans six routes; everything else is server or component state |
 | Forms & validation | react-hook-form 7 + zod 4 | Same zod schemas validate client input and edge function input |
 | Backend | Supabase: Postgres + RLS, Auth, Realtime, Storage, Edge Functions | All five needs (auth incl. phone OTP, relational orders, live tracking, chat, file uploads) in one service. See rationale |
-| Auth | Supabase Auth: phone OTP (sent through the Send SMS hook → Edge Function → Termii, see *SMS*), email OTP (custom SMTP: Resend), Google (`@react-native-google-signin/google-signin` + `signInWithIdToken`), Apple (`expo-apple-authentication` + `signInWithIdToken`, iOS; OAuth on Android) | Matches the four sign-in options in the designs |
+| Auth | Supabase Auth: phone OTP (sent through the Send SMS hook → Edge Function → Termii, see *SMS*), email OTP (custom SMTP: Resend), Google and Apple sign-in. The Google/Apple mechanism (native SDKs vs OAuth) is superseded by [spec 0003](../0003-onboarding-authentication.md): Supabase OAuth providers through expo-auth-session PKCE | Matches the four sign-in options in the designs |
 | Session storage | Supabase session encrypted with AES, key in `expo-secure-store`, ciphertext in `expo-sqlite` kv-store | SecureStore alone is too small for the session; plain storage would leave tokens readable |
 | Payments | `PaymentProvider` interface + `MockPaymentProvider` | Real provider later (Paystack or Flutterwave for Nigeria); UI built once |
 | Money & locale | Integer kobo; `Intl.NumberFormat('en-NG')`; `libphonenumber-js` with `NG` default | Exact arithmetic; Nigerian formats |

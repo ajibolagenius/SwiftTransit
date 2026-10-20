@@ -16,7 +16,7 @@ select public.create_order(
   '{"type":"document","package_size":"small","weight_kg":1,"payment_method":"wallet",
     "pickup_line":"1 Herbert Macaulay Way, Yaba","pickup_lat":6.5092,"pickup_lng":3.3777,
     "dropoff_line":"Allen Way, Ikeja","dropoff_lat":6.6018,"dropoff_lng":3.3515,
-    "receiver_name":"Tunde","receiver_phone":"+2348019999999","route_km":2}'::jsonb,
+    "receiver_name":"Tunde","receiver_phone":"+2348019999999"}'::jsonb,
   'sm-1');
 select public.pay_order(
   (select id from public.orders where idempotency_key = 'sm-1'), 'sm-pay-1', 'mock_sm1');

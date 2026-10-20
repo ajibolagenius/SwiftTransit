@@ -15,7 +15,10 @@ export const Input = forwardRef<
     helper?: string;
     icon?: IconComponent;
   }
->(function Input({ label, error, helper, icon: Icon, className, onFocus, onBlur, ...rest }, ref) {
+>(function Input(
+  { label, error, helper, icon: Icon, multiline = false, className, onFocus, onBlur, ...rest },
+  ref,
+) {
   const [focused, setFocused] = useState(false);
   const colors = useThemeColors();
 
@@ -24,7 +27,8 @@ export const Input = forwardRef<
       <Text className="font-sans text-label-md text-secondary">{label}</Text>
       <View
         className={cn(
-          'h-12 flex-row items-center gap-3 rounded-xl border bg-primary px-6',
+          'flex-row gap-3 rounded-xl border bg-primary px-6',
+          multiline ? 'items-start py-3' : 'h-12 items-center',
           error ? 'border-danger' : focused ? 'border-focus' : 'border-default',
         )}
       >
@@ -34,6 +38,9 @@ export const Input = forwardRef<
         <RNTextInput
           ref={ref}
           {...rest}
+          multiline={multiline}
+          numberOfLines={multiline ? 4 : undefined}
+          textAlignVertical={multiline ? 'top' : undefined}
           accessibilityLabel={label}
           accessibilityState={{ disabled: Boolean(rest.editable === false) }}
           placeholderTextColor={colors.text.tertiary}
