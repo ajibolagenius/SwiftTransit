@@ -170,8 +170,10 @@ export function buildTimeline(order: OrderRow, events: readonly OrderEventRow[])
       : null;
 
   // AC-5: a cancelled event with no actor is the 15 minute payment expiry job.
+  // It takes a real null-actor event to say so, so a failed or empty events
+  // read never rewrites a user cancel as an expiry.
   const expired =
-    order.status === 'cancelled' && !events.some((e) => e.status === 'cancelled' && e.actor_id !== null);
+    order.status === 'cancelled' && events.some((e) => e.status === 'cancelled' && e.actor_id === null);
 
   return { steps, terminal, expired };
 }

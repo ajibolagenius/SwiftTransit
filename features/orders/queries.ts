@@ -126,12 +126,15 @@ export function useOrderCourier(order: OrderRow | null | undefined) {
           supabase.rpc('courier_vehicle', { order_id: order.id }),
         ]);
       if (profileError) throw profileError;
-      // A missing vehicle row is not a failure: the card shows without it.
-      if (vehicleError && vehicleError.code !== 'P0004') throw vehicleError;
-      const v = (vehicle ?? null) as {
-        vehicle_type: Database['public']['Enums']['vehicle_type'];
-        vehicle_number: string;
-      } | null;
+      // `courier_vehicle` returns a table, so the RPC answers with an array.
+      // No rows means no vehicle yet, not a failure: the card shows without it.
+      if (vehicleError) throw vehicleError;
+      const v = (
+        (vehicle ?? []) as {
+          vehicle_type: Database['public']['Enums']['vehicle_type'];
+          vehicle_number: string;
+        }[]
+      )[0];
       return {
         firstName: profile?.first_name ?? '',
         lastName: profile?.last_name ?? '',

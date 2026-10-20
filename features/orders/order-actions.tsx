@@ -28,7 +28,9 @@ export function useCancelConfirm(orderId: string | undefined) {
     });
   };
 
-  return { pending: cancel.isPending, failed, run };
+  const reset = () => setFailed(null);
+
+  return { pending: cancel.isPending, failed, run, reset };
 }
 
 /** AC-9 confirmation copy, shared by the list menu and the detail screen. */
@@ -81,11 +83,12 @@ export function OrderActionsSheet({
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const { pending, failed, run } = useCancelConfirm(order?.id);
+  const { pending, failed, run, reset } = useCancelConfirm(order?.id);
 
   const close = () => {
     setConfirming(false);
     setCopied(false);
+    reset();
     onClose();
   };
 

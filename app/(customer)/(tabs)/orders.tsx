@@ -75,6 +75,9 @@ export default function OrdersScreen() {
   const failed = list.isError;
   const searching = query.trim().length > 0;
   const empty = !loading && !failed && visible.length === 0;
+  // The "no orders at all" state belongs to a customer who has never ordered.
+  // Under a filter or a search, an empty list is a no match, with its clear action.
+  const neverOrdered = filter === 'all' && rows.length === 0;
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-primary">
@@ -137,12 +140,12 @@ export default function OrdersScreen() {
       ) : empty ? (
         <View className="flex-1 items-center justify-center gap-3 px-9">
           <Text className="text-center font-sans text-subheading-md text-primary">
-            {rows.length === 0 ? t('orders.emptyTitle') : t('orders.noMatchTitle')}
+            {neverOrdered ? t('orders.emptyTitle') : t('orders.noMatchTitle')}
           </Text>
           <Text className="text-center font-sans text-body-md text-secondary">
-            {rows.length === 0 ? t('orders.emptyBody') : t('orders.noMatchBody')}
+            {neverOrdered ? t('orders.emptyBody') : t('orders.noMatchBody')}
           </Text>
-          {rows.length === 0 ? (
+          {neverOrdered ? (
             <Pressable
               accessibilityRole="link"
               onPress={() => router.push('/new-delivery/1')}
@@ -186,7 +189,7 @@ export default function OrdersScreen() {
           ListFooterComponent={
             list.isFetchingNextPage ? (
               <ActivityIndicator accessibilityRole="progressbar" color={colors.text.brand} />
-            ) : rows.length >= PAGE_SIZE && !searching ? (
+            ) : rows.length >= PAGE_SIZE && !searching && !list.hasNextPage ? (
               <Text className="text-center font-sans text-body-sm text-tertiary">
                 {t('orders.endOfList')}
               </Text>

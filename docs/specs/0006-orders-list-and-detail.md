@@ -160,7 +160,7 @@ Ordered as a tracer bullet: one thin end to end thread first (hook to rendered l
 
 **Positive**:
 - The tracking number from the confirmation screen now leads somewhere, and the booking loop closes end to end.
-- No migration, no new server functions, no new dependencies.
+- One small migration adds one definer function, `courier_vehicle`; no other server code and no new dependencies.
 - The realtime helper becomes the pattern every later status-driven screen (features 9, 10, 11, 14) reuses.
 
 **Negative / tradeoffs**:

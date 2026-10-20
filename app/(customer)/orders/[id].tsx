@@ -71,14 +71,19 @@ export default function OrderDetailScreen() {
 
   const header = (
     <View className="flex-row items-center gap-4 px-7 pb-2 pt-2">
-      <IconButton accessibilityLabel={t('orders.detail.back')} onPress={() => router.back()} />
+      <IconButton
+        accessibilityLabel={t('orders.detail.back')}
+        onPress={() => (router.canGoBack() ? router.back() : router.replace('/orders'))}
+      />
       <Text accessibilityRole="header" numberOfLines={1} className="flex-1 font-sans text-h4 text-primary">
         {t('orders.detail.title')}
       </Text>
     </View>
   );
 
-  if (detail.isError) {
+  // A failed background refetch keeps the loaded order on screen; only a read
+  // that never produced data shows the error state.
+  if (detail.isError && !detail.data) {
     return (
       <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-primary">
         {header}
@@ -122,7 +127,7 @@ export default function OrderDetailScreen() {
           </Text>
           <Pressable
             accessibilityRole="link"
-            onPress={() => router.dismissTo('/orders')}
+            onPress={() => (router.canGoBack() ? router.dismissTo('/orders') : router.replace('/orders'))}
             hitSlop={8}
             className="py-3"
           >

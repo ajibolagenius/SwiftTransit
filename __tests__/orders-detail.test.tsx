@@ -75,11 +75,8 @@ const mockEqCalls: { table: string; column: string; value: unknown }[] = [];
 const mockRpc = jest.fn((name: string, args: Record<string, unknown>) => {
   mockRpcCalls.push({ name, args });
   if (name === 'courier_vehicle') {
-    return Promise.resolve(
-      mockVehicle
-        ? { data: mockVehicle, error: null }
-        : { data: null, error: { code: 'P0004', message: 'no vehicle row' } },
-    );
+    // The function returns a table, so a real RPC answer is an array of rows.
+    return Promise.resolve({ data: mockVehicle ? [mockVehicle] : [], error: null });
   }
   return Promise.resolve({ data: { status: 'cancelled' }, error: null });
 });

@@ -26,7 +26,8 @@ over.
 - [ ] Sign in as customer A, open the Orders tab. Every card is an order A booked, sorted by `created_at` descending. Cross check against `select tracking_code, created_at from public.orders where customer_id = '<A>' order by created_at desc;`.
 - [ ] Newest first holds across the boundary between pages, not only inside one page.
 - [ ] Pull to refresh on the list. The spinner shows and the rows reload in place.
-- [ ] Sign in as customer B. None of A's tracking codes appear. This is the policy doing the work, so confirm the query itself never names another customer: the list filters on `customer_id = auth.uid()` server side.
+- [ ] Sign in as customer B. None of A's tracking codes appear.
+- [ ] Prove the policy, not the query, does that work, in two independent checks. First the RLS policy: in the SQL editor run `select polname, pg_get_expr(polqual, polrelid) from pg_policy where polrelid = 'public.orders'::regclass;` and confirm the customer SELECT policy restricts rows by `auth.uid()`. Second the client query: read `useOrdersQuery` in `features/orders/queries.ts` and confirm it never supplies or names another customer id; ownership comes from the policy alone.
 - [ ] With more than 20 orders on A, scroll to the bottom and trigger Load more. Page two appends the next 20 with no duplicate card, and the first page window asked for rows 0 to 19.
 
 ## AC-2: the filter drives the query
