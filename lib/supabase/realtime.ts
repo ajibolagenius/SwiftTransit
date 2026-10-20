@@ -10,6 +10,12 @@ import { supabase } from '@/lib/supabase';
 
 type Subscription = { cancel: () => void };
 
+// The realtime client reuses any live channel with the same name, so two
+// mounted surfaces (home tab, orders tab, detail) would share one channel and
+// the first unmount would removeChannel it for the others. A per-subscription
+// suffix keeps every surface's channel independent.
+let subscriptionSeq = 0;
+
 export function subscribeToOrderRows(
   userId: string | undefined,
   onRow: (orderId: string) => void,
@@ -21,7 +27,8 @@ export function subscribeToOrderRows(
     return { cancel: () => {} };
   }
 
-  const channel = supabase.channel(`swifttransit-orders:${userId}`);
+  subscriptionSeq += 1;
+  const channel = supabase.channel(`swifttransit-orders:${userId}:${subscriptionSeq}`);
   channel.on(
     'postgres_changes',
     { event: '*', schema: 'public', table: 'orders', filter: `customer_id=eq.${userId}` },

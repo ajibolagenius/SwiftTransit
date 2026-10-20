@@ -47,7 +47,7 @@ describe('subscribeToOrderRows', () => {
   it('subscribes to this customer orders rows only', () => {
     subscribeToOrderRows('user-1', () => {});
 
-    expect(mockChannel).toHaveBeenCalledWith('swifttransit-orders:user-1');
+    expect(mockChannel).toHaveBeenCalledWith(expect.stringMatching(/^swifttransit-orders:user-1:\d+$/));
     expect(mockConfigs[0]).toEqual({
       event: '*',
       schema: 'public',
@@ -85,6 +85,59 @@ describe('subscribeToOrderRows', () => {
     expect(() => subscribeToOrderRows('user-1', () => {}).cancel()).not.toThrow();
     expect(mockChannel).not.toHaveBeenCalled();
   });
+});
+
+// covers: AC-11, and the channel name collision bug
+it('gives two mounted surfaces of the same customer independent subscriptions', () => {
+  // This client behaves like the real one: channel(name) returns the existing
+  // channel when the name is taken, and removeChannel kills it for everyone
+  // sharing it. A fixed-name helper collides here.
+  type Ch = {
+    bindings: ((payload: Payload) => void)[];
+    on: (type: string, config: unknown, handler: (payload: Payload) => void) => void;
+    subscribe: jest.Mock;
+  };
+  const channels = new Map<string, Ch>();
+  const fake = {
+    channel(name: string): Ch {
+      let ch = channels.get(name);
+      if (!ch) {
+        ch = {
+          bindings: [],
+          on: (_type, _config, handler) => {
+            ch!.bindings.push(handler);
+          },
+          subscribe: jest.fn(),
+        };
+        channels.set(name, ch);
+      }
+      return ch;
+    },
+    removeChannel(ch: Ch) {
+      for (const [name, registered] of channels) {
+        if (registered === ch) channels.delete(name);
+      }
+    },
+  };
+  mockClient = fake;
+
+  const listSeen: string[] = [];
+  const detailSeen: string[] = [];
+  const listSub = subscribeToOrderRows('user-1', (id) => listSeen.push(id));
+  subscribeToOrderRows('user-1', (id) => detailSeen.push(id));
+
+  // Two live channels, one per surface, never a shared name.
+  expect(channels.size).toBe(2);
+
+  // The list screen goes away while the detail screen stays mounted.
+  listSub.cancel();
+
+  // The server pushes a change; the detail surface must still hear it.
+  for (const ch of channels.values()) {
+    for (const bind of ch.bindings) bind({ new: { id: 'order-1' } });
+  }
+  expect(detailSeen).toEqual(['order-1']);
+  expect(listSeen).toEqual([]);
 });
 
 describe('useOrderFreshness', () => {
