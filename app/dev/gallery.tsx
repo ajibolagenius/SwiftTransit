@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { BalanceCard } from '@/components/ui/balance-card';
@@ -24,6 +24,7 @@ import { RUNE_ICONS, type IconName } from '@/assets/rune-glass.generated';
 // Dev-only design system gallery (scope feature 4). Reached from the onboarding placeholder in dev builds.
 export default function Screen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [loadingDemo, setLoadingDemo] = useState(false);
   const [name, setName] = useState('Adebayo Okafor');
   const [phone, setPhone] = useState('8021234567');
@@ -57,7 +58,8 @@ export default function Screen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-8 px-7 pb-40 pt-3"
+        contentContainerClassName="gap-8 px-7 pt-3"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2 rounded-2xl bg-secondary p-7">

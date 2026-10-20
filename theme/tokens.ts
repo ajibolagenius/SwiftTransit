@@ -41,6 +41,8 @@ const semanticPairs = {
     secondary: ['neutral-25', 'dark-surface'],
     tertiary: ['neutral-50', 'dark-surface'],
     inverse: ['neutral-950', 'neutral-0'],
+    // Dimming layer behind sheets/modals: always dark, unlike `inverse` which flips to white.
+    scrim: ['neutral-950', 'neutral-950'],
     brand: ['green-900', 'green-500'],
     'brand-subtle': ['green-200', 'dark-brand-subtle'],
     success: ['green-500', 'green-500'],
