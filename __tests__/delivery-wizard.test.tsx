@@ -38,9 +38,21 @@ jest.mock('expo-crypto', () => {
   };
 });
 jest.mock('@/lib/supabase', () => {
-  const chain = { order: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }) };
+  const empty = Promise.resolve({ data: [], error: null });
+  // Builder steps hand back the same chainable so any select shape resolves to
+  // an empty page. Nothing here answers for real: the wizard tests never reach
+  // the price or the booking call, and an empty read puts every screen in its
+  // own empty state, which the screens already know how to render.
+  const chainable: Record<string, unknown> = {};
+  for (const step of ['select', 'eq', 'in', 'order']) chainable[step] = () => chainable;
+  chainable.limit = () => empty;
+  chainable.range = () => empty;
+  chainable.maybeSingle = () => Promise.resolve({ data: null, error: null });
+  const insert = jest.fn(() => Promise.resolve({ error: null }));
+  chainable.insert = insert;
   return {
     supabase: {
+      _insert: insert,
       auth: {
         updateUser: jest.fn(),
         getSession: jest.fn(() =>
@@ -49,12 +61,11 @@ jest.mock('@/lib/supabase', () => {
           }),
         ),
       },
-      // Nothing here answers for real: the wizard tests never reach the price
-      // or the booking call. A call that was supposed to be mocked shows up as
-      // a failed query, which the screens already render as their error state.
+      // A call that was supposed to be mocked shows up as a failed query, which
+      // the screens already render as their error state.
       rpc: jest.fn(() => Promise.resolve({ data: null, error: new Error('not mocked') })),
       functions: { invoke: jest.fn(() => Promise.resolve({ data: null, error: new Error('not mocked') })) },
-      from: jest.fn(() => ({ select: () => chain, insert: jest.fn(() => Promise.resolve({ error: null })) })),
+      from: jest.fn(() => chainable),
       storage: { from: jest.fn(() => ({ upload: jest.fn(), remove: jest.fn() })) },
     },
   };
@@ -115,13 +126,15 @@ describe('entering the wizard', () => {
     expect(await screen.findByText('What are you sending?')).toBeTruthy();
   });
 
-  // covers: AC-17
-  it('shows the track row on home as unavailable, with its hint', async () => {
+  // Spec 0006 replaced AC-17's unavailable stub: the track row opens the Orders tab.
+  it('opens the orders tab from the home track row', async () => {
     await open('/');
-    const track = await screen.findByText('Track a delivery');
 
-    expect(screen.getByText('Coming with the orders screen')).toBeTruthy();
-    expect(track).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(await screen.findByText('Track a delivery'));
+    });
+
+    expect(await screen.findByText('All Orders')).toBeTruthy();
   });
 
   // covers: AC-20
@@ -434,13 +447,12 @@ describe('the confirmation', () => {
     expect(clipboard.setStringAsync).toHaveBeenCalledWith('7KQ2M4XJ');
   });
 
-  // covers: AC-17
-  it('offers View order as unavailable and says why', async () => {
+  // covers: AC-13 (spec 0006 replaced the stub this test used to pin)
+  it('offers View order as the way to the order detail', async () => {
     await open(bookedUrl);
 
     const viewOrder = await screen.findByRole('button', { name: /View order/ });
-    expect(viewOrder.props.accessibilityState).toMatchObject({ disabled: true });
-    expect(screen.getByText('Order tracking arrives with the orders screen.')).toBeTruthy();
+    expect(viewOrder.props.accessibilityState).toMatchObject({ disabled: false });
   });
 
   // covers: AC-15
@@ -480,11 +492,10 @@ describe('the confirmation', () => {
     });
 
     await screen.findByText('Saved to your profile');
-    // Every `from('addresses')` call hands back its own insert, so the two rows
-    // are read off the calls rather than one shared mock.
-    const written = supabase.from.mock.results
-      .map((result) => (result.value as { insert: jest.Mock }).insert.mock.calls[0]?.[0])
-      .filter(Boolean);
+    // Every write goes through the one insert the mock hands back, so both rows
+    // show up as calls on it.
+    const { _insert: inserted } = supabase as unknown as { _insert: jest.Mock };
+    const written = inserted.mock.calls.map((call) => call[0]);
     expect(written).toHaveLength(2);
     expect(written[0]).toMatchObject({
       owner_id: '00000000-0000-4000-8000-0000000000c1',
