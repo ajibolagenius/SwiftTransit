@@ -1,10 +1,10 @@
-import type { LucideIcon } from 'lucide-react-native';
 import type { TextInput, TextInputProps } from 'react-native';
 import { Text, TextInput as RNTextInput, View } from 'react-native';
 import { forwardRef, useState } from 'react';
 
 import { cn } from './cn';
 import { useThemeColors } from '@/theme/use-theme';
+import type { IconComponent } from '@/components/ui/rune-icon';
 
 // DESIGN.md inputs: label above, 48 px field (spacing step 12) with leading icon, focus and error borders.
 export const Input = forwardRef<
@@ -13,7 +13,7 @@ export const Input = forwardRef<
     label: string;
     error?: string;
     helper?: string;
-    icon?: LucideIcon;
+    icon?: IconComponent;
   }
 >(function Input({ label, error, helper, icon: Icon, className, onFocus, onBlur, ...rest }, ref) {
   const [focused, setFocused] = useState(false);

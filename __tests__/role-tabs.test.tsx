@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Home, Package, User, Wallet } from 'lucide-react-native';
 
 import type { ReactElement } from 'react';
 import { wrapper } from '@/testing/providers';
+import { icons } from '@/components/ui/rune-icon';
 
 import { RoleTabs } from '@/components/role-tabs';
 import '@/lib/i18n'; // initialises the real English resources for useTranslation
@@ -31,10 +31,10 @@ jest.mock('expo-router', () => {
 const renderWith = (element: ReactElement) => render(element, { wrapper });
 
 const tabs = [
-  { name: 'home', title: 'home' as const, icon: Home },
-  { name: 'orders', title: 'orders' as const, icon: Package },
-  { name: 'wallet', title: 'wallet' as const, icon: Wallet },
-  { name: 'profile', title: 'profile' as const, icon: User },
+  { name: 'home', title: 'home' as const, icon: icons.Home },
+  { name: 'orders', title: 'orders' as const, icon: icons.Package },
+  { name: 'wallet', title: 'wallet' as const, icon: icons.Wallet },
+  { name: 'profile', title: 'profile' as const, icon: icons.User },
 ];
 
 beforeEach(() => {

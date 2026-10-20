@@ -1,8 +1,8 @@
-import type { LucideIcon } from 'lucide-react-native';
 import { Text, View } from 'react-native';
 
 import { cn } from './cn';
 import { useThemeColors } from '@/theme/use-theme';
+import type { IconComponent } from '@/components/ui/rune-icon';
 
 type ChipTone = 'brand' | 'amber' | 'neutral';
 
@@ -14,7 +14,7 @@ export function Chip({
   children,
   className,
 }: {
-  icon?: LucideIcon;
+  icon?: IconComponent;
   tone?: ChipTone;
   children: string;
   className?: string;

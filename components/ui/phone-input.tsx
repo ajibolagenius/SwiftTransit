@@ -1,9 +1,9 @@
-import { ChevronDown } from 'lucide-react-native';
 import type { TextInput } from 'react-native';
 import { forwardRef, useState } from 'react';
 import { Pressable, Text, TextInput as RNTextInput, View } from 'react-native';
 
 import { useThemeColors } from '@/theme/use-theme';
+import { icons } from '@/components/ui/rune-icon';
 
 // TODO: missing asset: country flag icons. DESIGN.md wants flag + dial code + chevron;
 // until flag art exists the selector shows the dial code only (no emoji-as-icon).
@@ -62,7 +62,9 @@ export const PhoneInput = forwardRef<
           className={`h-10 flex-row items-center gap-1 rounded-lg px-4 ${onPressCountry ? 'active:bg-tertiary' : ''}`}
         >
           <Text className="font-sans text-label-md text-primary">{dialCode}</Text>
-          {onPressCountry ? <ChevronDown size={16} strokeWidth={1.5} color={colors.text.tertiary} /> : null}
+          {onPressCountry ? (
+            <icons.ChevronDown size={16} strokeWidth={1.5} color={colors.text.tertiary} />
+          ) : null}
         </Pressable>
         <RNTextInput
           ref={ref}

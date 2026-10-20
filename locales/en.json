@@ -12,6 +12,7 @@
     "introTitle": "Design system, live",
     "intro": "Every UI primitive from DESIGN.md, rendered in the current theme.",
     "introHint": "Switch your phone's appearance to light or dark to check both themes.",
+    "icons": "RuneIcons Glass set",
     "buttons": "Buttons",
     "primary": "Continue",
     "primaryLoading": "Booking your delivery",

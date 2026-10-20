@@ -1,16 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Home, Package, User, Wallet } from 'lucide-react-native';
 
 import { sizedNodes } from '@/testing/sized-nodes';
 import { wrapper } from '@/testing/providers';
 import type { ReactElement } from 'react';
 import { TabBar, type TabBarItem } from '@/components/ui/tab-bar';
+import { icons } from '@/components/ui/rune-icon';
 
 const items: TabBarItem[] = [
-  { key: 'home', label: 'Home', icon: Home },
-  { key: 'orders', label: 'Orders', icon: Package },
-  { key: 'wallet', label: 'Wallet', icon: Wallet },
-  { key: 'profile', label: 'Profile', icon: User },
+  { key: 'home', label: 'Home', icon: icons.Home },
+  { key: 'orders', label: 'Orders', icon: icons.Package },
+  { key: 'wallet', label: 'Wallet', icon: icons.Wallet },
+  { key: 'profile', label: 'Profile', icon: icons.User },
 ];
 
 const renderWith = (element: ReactElement) => render(element, { wrapper });

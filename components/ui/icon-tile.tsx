@@ -1,8 +1,8 @@
-import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { cn } from './cn';
 import { useThemeColors } from '@/theme/use-theme';
+import type { IconComponent } from '@/components/ui/rune-icon';
 
 // DESIGN.md icon-tile: 40 px circle on the brand-subtle surface. Decorative: hidden from assistive tech.
 export function IconTile({
@@ -10,7 +10,7 @@ export function IconTile({
   size = 40,
   className,
 }: {
-  icon: LucideIcon;
+  icon: IconComponent;
   size?: number;
   className?: string;
 }) {

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
-import { AlertTriangle } from 'lucide-react-native';
 
 import { Chip } from '@/components/ui/chip';
+import { icons } from '@/components/ui/rune-icon';
 
 describe('Chip', () => {
   // covers: AC-1
@@ -22,7 +22,7 @@ describe('Chip', () => {
 
   // covers: AC-5
   it('keeps the leading icon decorative', async () => {
-    await render(<Chip icon={AlertTriangle}>Fragile</Chip>);
+    await render(<Chip icon={icons.AlertTriangle}>Fragile</Chip>);
     expect(screen.queryAllByRole('image')).toHaveLength(0);
     expect(screen.getAllByText('Fragile')).toHaveLength(1);
   });

@@ -22,7 +22,6 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
     "i18next": "^26.4.3",
-    "lucide-react-native": "^1.57.0",
     "nativewind": "^4.2.7",
     "react": "19.2.3",
     "react-i18next": "^17.0.16",
@@ -49,6 +48,7 @@
     "jest-expo": "~57.0.5",
     "prettier": "^3.9.10",
     "react-dom": "19.2.3",
+    "runeicons": "^0.1.0",
     "test-renderer": "^1.3.0",
     "typescript": "~6.0.3"
   },
@@ -66,7 +66,7 @@
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|lucide-react-native))",
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation))",
       "/node_modules/react-native-reanimated/plugin/",
       "/node_modules/@react-native/babel-preset/"
     ],
@@ -75,7 +75,8 @@
     },
     "moduleNameMapper": {
       "^react-native-reanimated$": "<rootDir>/mocks/react-native-reanimated.js",
-      "^react-native-reanimated/mock$": "<rootDir>/mocks/reanimated-mock.js"
+      "^react-native-reanimated/mock$": "<rootDir>/mocks/reanimated-mock.js",
+      "^react-native-svg$": "<rootDir>/mocks/react-native-svg.js"
     }
   }
 }

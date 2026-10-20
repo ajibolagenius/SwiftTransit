@@ -1,5 +1,3 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { Circle, CircleCheck } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -7,6 +5,7 @@ import { cn } from './cn';
 import { IconTile } from './icon-tile';
 import { usePressScale } from './use-press-scale';
 import { useThemeColors } from '@/theme/use-theme';
+import { type IconComponent, icons } from '@/components/ui/rune-icon';
 
 // DESIGN.md select-card: icon tile + title + subtitle + trailing radio.
 // Selected = brand-soft surface with a brand border.
@@ -18,7 +17,7 @@ export function SelectCard({
   onPress,
   className,
 }: {
-  icon: LucideIcon;
+  icon: IconComponent;
   title: string;
   subtitle?: string;
   selected?: boolean;
@@ -27,7 +26,7 @@ export function SelectCard({
 }) {
   const { animatedStyle, onPressIn, onPressOut } = usePressScale();
   const colors = useThemeColors();
-  const Radio = selected ? CircleCheck : Circle;
+  const Radio = selected ? icons.CircleCheck : icons.Circle;
 
   return (
     <Pressable

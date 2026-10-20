@@ -18,7 +18,7 @@ SwiftTransit: Expo (React Native) courier app for Nigeria, iOS and Android, two 
 
 ## Stack (decided in spec 0001)
 
-Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · MapLibre RN + OpenFreeMap tiles · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider` · Geoapify geocoding and routing (via the `geo` Edge Function) · Termii SMS via Send SMS hook · Resend SMTP. Development builds, not Expo Go.
+Expo SDK 57 · Expo Router · TypeScript strict · NativeWind 4 · Reanimated 4 · RuneIcons "Glass" (`runeicons` npm, via `components/ui/rune-icon`) · MapLibre RN + OpenFreeMap tiles · Supabase (Postgres/RLS, Auth, Realtime, Storage, Edge Functions) · TanStack Query · Zustand (wizard draft only) · react-hook-form + zod · i18next · mocked `PaymentProvider` · Geoapify geocoding and routing (via the `geo` Edge Function) · Termii SMS via Send SMS hook · Resend SMTP. Development builds, not Expo Go.
 
 ## Build approach
 
