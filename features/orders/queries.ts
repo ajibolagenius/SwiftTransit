@@ -38,7 +38,7 @@ export function useSessionUserId(): string | undefined {
 }
 
 const LIST_COLUMNS =
-  'id,tracking_code,type,status,scheduled_at,pickup_line,pickup_lat,pickup_lng,dropoff_line,dropoff_lat,dropoff_lng,receiver_name,receiver_phone,instructions,package_size,weight_kg,handling_flags,scheduled_at,base_kobo,distance_kobo,handling_kobo,total_kobo,payment_method,courier_id,created_at';
+  'id,tracking_code,type,status,scheduled_at,pickup_line,pickup_lat,pickup_lng,dropoff_line,dropoff_lat,dropoff_lng,receiver_name,receiver_phone,instructions,package_size,weight_kg,handling_flags,base_kobo,distance_kobo,handling_kobo,total_kobo,payment_method,courier_id,created_at';
 
 export function useOrdersQuery(filter: OrderFilter, enabled = true) {
   const userId = useSessionUserId();

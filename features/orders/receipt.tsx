@@ -14,7 +14,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start justify-between gap-4 border-b border-default py-4">
       <Text className="font-sans text-label-sm text-tertiary">{label}</Text>
-      <Text className="min-w-0 flex-1 text-right font-sans text-body-md text-primary">{value}</Text>
+      <Text className="min-w-0 flex-1 text-end font-sans text-body-md text-primary">{value}</Text>
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import type { ReactNode } from 'react';
 
@@ -387,4 +387,29 @@ describe('the order detail', () => {
     await press(await screen.findByRole('button', { name: 'Try again' }));
     expect(await screen.findByText('TN-7KQ2M4XJ')).toBeTruthy();
   });
+
+  // covers: AC-14
+  it('keeps the loaded order on screen when a background refetch fails', async () => {
+    await open(ORDER_ID);
+    await screen.findByText('TN-7KQ2M4XJ');
+
+    // A realtime style invalidation refetches the row, and this time the read
+    // fails. The retry timer only advances under waitFor (fake timers), so
+    // the settled error state is waited for, not awaited. The cached order
+    // stays on screen; the full screen error state is only for a read that
+    // never produced data.
+    mockFailDetail = true;
+    act(() => {
+      void queryClient.refetchQueries({ queryKey: ['order', ORDER_ID] });
+    });
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryCache().find({ queryKey: ['order', ORDER_ID], exact: true })?.state.status,
+      ).toBe('error'),
+    );
+
+    expect(screen.queryByText(/load your orders/)).toBeNull();
+    expect(screen.getByText('TN-7KQ2M4XJ')).toBeTruthy();
+  }, 15000);
 });

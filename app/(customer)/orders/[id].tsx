@@ -65,6 +65,10 @@ export default function OrderDetailScreen() {
   const order = detail.data ?? null;
   const courier = useOrderCourier(order);
   const cancel = useCancelConfirm(order?.id);
+  const dismissCancel = () => {
+    setConfirming(false);
+    cancel.reset();
+  };
 
   // AC-11: a realtime row change refreshes this screen, its events and the list.
   useOrderFreshness(userId, id);
@@ -101,7 +105,9 @@ export default function OrderDetailScreen() {
     );
   }
 
-  if (detail.isPending) {
+  // A missing or blank id never starts a read (the query stays disabled), so it
+  // skips the spinner and lands in the not-found state below.
+  if (detail.isPending && id) {
     return (
       <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-primary">
         {header}
@@ -216,7 +222,7 @@ export default function OrderDetailScreen() {
 
       <Sheet
         open={confirming}
-        onDismiss={() => setConfirming(false)}
+        onDismiss={dismissCancel}
         title={t('orders.cancelTitle')}
         dismissLabel={t('orders.sheetDismiss')}
         icon={XCircle}
@@ -226,7 +232,7 @@ export default function OrderDetailScreen() {
           pending={cancel.pending}
           error={cancel.failed}
           onCancel={() => cancel.run(() => setConfirming(false))}
-          onDismiss={() => setConfirming(false)}
+          onDismiss={dismissCancel}
         />
       </Sheet>
     </SafeAreaView>
