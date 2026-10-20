@@ -23,123 +23,164 @@ over.
 
 ## AC-1: the tab lists the customer's own orders, newest first
 
-- [ ] Sign in as customer A, open the Orders tab. Every card is an order A booked, sorted by `created_at` descending. Cross check against `select tracking_code, created_at from public.orders where customer_id = '<A>' order by created_at desc;`.
-- [ ] Newest first holds across the boundary between pages, not only inside one page.
-- [ ] Pull to refresh on the list. The spinner shows and the rows reload in place.
-- [ ] Sign in as customer B. None of A's tracking codes appear.
-- [ ] Prove the policy, not the query, does that work, in two independent checks. First the RLS policy: in the SQL editor run `select polname, pg_get_expr(polqual, polrelid) from pg_policy where polrelid = 'public.orders'::regclass;` and confirm the customer SELECT policy restricts rows by `auth.uid()`. Second the client query: read `useOrdersQuery` in `features/orders/queries.ts` and confirm it never supplies or names another customer id; ownership comes from the policy alone.
-- [ ] With more than 20 orders on A, scroll to the bottom and trigger Load more. Page two appends the next 20 with no duplicate card, and the first page window asked for rows 0 to 19.
+- [x] Sign in as customer A, open the Orders tab. Every card is an order A booked, sorted by `created_at` descending. Cross check against `select tracking_code, created_at from public.orders where customer_id = '<A>' order by created_at desc;`.
+- [x] Newest first holds across the boundary between pages, not only inside one page.
+- [x] Pull to refresh on the list. The spinner shows and the rows reload in place.
+- [x] Sign in as customer B. None of A's tracking codes appear.
+- [x] Prove the policy, not the query, does that work, in two independent checks. First the RLS policy: in the SQL editor run `select polname, pg_get_expr(polqual, polrelid) from pg_policy where polrelid = 'public.orders'::regclass;` and confirm the customer SELECT policy restricts rows by `auth.uid()`. Second the client query: read `useOrdersQuery` in `features/orders/queries.ts` and confirm it never supplies or names another customer id; ownership comes from the policy alone.
+- [x] With more than 20 orders on A, scroll to the bottom and trigger Load more. Page two appends the next 20 with no duplicate card, and the first page window asked for rows 0 to 19.
 
 ## AC-2: the filter drives the query
 
-- [ ] All Orders shows every status. Active Orders shows only `pending_payment`, `searching`, `assigned`, `at_pickup`, `picked_up`, `at_dropoff`. Past Orders shows only `delivered`, `cancelled`, `failed`.
-- [ ] The filter is what selects the rows, not the rows already on screen. Proof: book an order, leave the tab, come back on Past, and the fresh order is absent. Move to Active and it appears without any new booking.
+- [x] All Orders shows every status. Active Orders shows only `pending_payment`, `searching`, `assigned`, `at_pickup`, `picked_up`, `at_dropoff`. Past Orders shows only `delivered`, `cancelled`, `failed`.
+- [x] The filter is what selects the rows, not the rows already on screen. Proof: book an order, leave the tab, come back on Past, and the fresh order is absent. Move to Active and it appears without any new booking.
 - [ ] Switching filters keeps the paging honest: page two under Active must not leak a `delivered` order.
 
 ## AC-3: search on the tracking code
 
-- [ ] Type the digits of a code without the prefix (`5483`), then with it (`TN-5483`), then in mixed case. All three narrow the list to that order.
-- [ ] Search while on Active Orders, then on Past. The filter still applies; a matching order from the other bucket does not jump in.
-- [ ] Type a code that matches nothing. The no match empty state appears with a clear action, not the "you have no orders" state.
-- [ ] The scan icon is on screen, disabled, and announces that QR scan arrives later. Tapping it does nothing.
+- [x] Type the digits of a code without the prefix (`5483`), then with it (`TN-5483`), then in mixed case. All three narrow the list to that order.
+- [x] Search while on Active Orders, then on Past. The filter still applies; a matching order from the other bucket does not jump in.
+- [x] Type a code that matches nothing. The no match empty state appears with a clear action, not the "you have no orders" state.
+- [x] The scan icon is on screen, disabled, and announces that QR scan arrives later. Tapping it does nothing.
 - [ ] Known gap, accept it deliberately: search walks the pages already loaded. With 25 orders, search a code that lives on page two, before Load more has pulled it. It reports no match. Spec 0006 records this as the cost of option 1 and as follow up work if the history grows.
 
 ## AC-4: a card opens the detail from a fresh read
 
-- [ ] Cold start the app (kill it, relaunch), go to the Orders tab, tap a card. The detail renders the tracking code, status, receipt, everything, with nothing carried through navigation params.
-- [ ] Push the detail route directly with a bare id while the app has no list cache for it. It still renders, which proves the read by id.
+- [x] Cold start the app (kill it, relaunch), go to the Orders tab, tap a card. The detail renders the tracking code, status, receipt, everything, with nothing carried through navigation params.
+- [x] Push the detail route directly with a bare id while the app has no list cache for it. It still renders, which proves the read by id.
 
 ## AC-5: the timeline collapses the database statuses into customer steps
 
-- [ ] Order in `searching`: one reached step, Booked, with the timestamp of its `order_events` row. The other steps render as not reached.
-- [ ] Move the same order to `assigned`, then `at_pickup`. Courier found appears once, and its time is the `assigned` event, the earlier of the two statuses that collapse into it. It does not become two steps.
-- [ ] Then `picked_up`, then `at_dropoff`: On the way appears once. Then `delivered`: Delivered.
-- [ ] Cancel an order yourself from `searching`. The terminal step reads as your cancel.
-- [ ] The expiry case, which is the one easy to get wrong: book, reach the card sheet, leave it unpaid past 15 minutes plus one cron tick (the recipe in `0005-create-a-delivery.md`). `select status, actor_id from public.order_events where order_id = '<id>' order by created_at;` ends with a `cancelled` row whose `actor_id` is null. The detail must read "Payment window expired", not the user cancel sentence, and Past must show it as expired.
+- [x] Order in `searching`: one reached step, Booked, with the timestamp of its `order_events` row. The other steps render as not reached.
+- [x] Move the same order to `assigned`, then `at_pickup`. Courier found appears once, and its time is the `assigned` event, the earlier of the two statuses that collapse into it. It does not become two steps.
+- [x] Then `picked_up`, then `at_dropoff`: On the way appears once. Then `delivered`: Delivered.
+- [x] Cancel an order yourself from `searching`. The terminal step reads as your cancel.
+- [x] The expiry case, which is the one easy to get wrong: book, reach the card sheet, leave it unpaid past 15 minutes plus one cron tick (the recipe in `0005-create-a-delivery.md`). `select status, actor_id from public.order_events where order_id = '<id>' order by created_at;` ends with a `cancelled` row whose `actor_id` is null. The detail must read "Payment window expired", not the user cancel sentence, and Past must show it as expired.
 
 ## AC-6: the route map
 
-- [ ] The detail shows a static map with a pin at pickup, a pin at dropoff, and a dashed line between them. The camera fits both, with padding so neither pin sits under the header.
-- [ ] The coordinates on screen match `pickup_lat`, `pickup_lng`, `dropoff_lat`, `dropoff_lng` for that order.
-- [ ] No courier marker and no movement. Live position is out of scope for this slice.
+- [x] The detail shows a static map with a pin at pickup, a pin at dropoff, and a dashed line between them. The camera fits both, with padding so neither pin sits under the header.
+- [x] The coordinates on screen match `pickup_lat`, `pickup_lng`, `dropoff_lat`, `dropoff_lng` for that order.
+- [x] No courier marker and no movement. Live position is out of scope for this slice.
 
 ## AC-7: the courier card
 
-- [ ] While `courier_id` is null, the section is absent entirely. Not empty, absent.
-- [ ] Have the courier account accept the job. The section appears with the display name (`first_name` and `last_name` joined), and the vehicle line, which comes from the new `courier_vehicle(order_id)` function. Match it against `select vehicle_type, vehicle_number from public.courier_applications where user_id = '<courier>';`.
-- [ ] Call opens the device dialer with the courier's stored number (`Linking` with a `tel:` URL). On a simulator with no dialer, confirm the app does not crash.
-- [ ] Set the courier's `profiles.phone` to null in the SQL editor. Call disappears, the rest of the card stays. Phone is nullable and the card must not offer a call to nothing.
-- [ ] Chat routes to the existing chat placeholder.
-- [ ] Negative, from a SQL editor session as customer B: `select * from public.courier_vehicle('<A order id>');` returns no row. The harness covers this too; this confirms it on the deployed project.
+- [x] While `courier_id` is null, the section is absent entirely. Not empty, absent.
+- [x] Have the courier account accept the job. The section appears with the display name (`first_name` and `last_name` joined), and the vehicle line, which comes from the new `courier_vehicle(order_id)` function. Match it against `select vehicle_type, vehicle_number from public.courier_applications where user_id = '<courier>';`.
+- [x] Call opens the device dialer with the courier's stored number (`Linking` with a `tel:` URL). On a simulator with no dialer, confirm the app does not crash.
+- [x] Set the courier's `profiles.phone` to null in the SQL editor. Call disappears, the rest of the card stays. Phone is nullable and the card must not offer a call to nothing.
+- [x] Chat routes to the existing chat placeholder.
+- [x] Negative, from a SQL editor session as customer B: `select * from public.courier_vehicle('<A order id>');` returns no row. The harness covers this too; this confirms it on the deployed project.
 
 ## AC-8: the receipt
 
-- [ ] Walk the rows against the database columns for one order: type, package size, weight, handling flags (a "None" line when empty), receiver name and phone, instructions, schedule, the pickup line, the dropoff line.
-- [ ] The breakdown reads base, distance, handling, total, each formatted as naira from kobo. `total_kobo` 224900 shows as ₦2,249.00. The sum of the three lines above equals the total on screen.
-- [ ] An order with `scheduled_at` null shows the ASAP text, not a blank and not a fabricated time.
+- [x] Walk the rows against the database columns for one order: type, package size, weight, handling flags (a "None" line when empty), receiver name and phone, instructions, schedule, the pickup line, the dropoff line.
+- [x] The breakdown reads base, distance, handling, total, each formatted as naira from kobo. `total_kobo` 224900 shows as ₦2,249.00. The sum of the three lines above equals the total on screen.
+- [x] An order with `scheduled_at` null shows the ASAP text, not a blank and not a fabricated time.
 - [ ] A scheduled order shows its slot in `en-NG` form.
-- [ ] Switch between two order types (document and parcel) and confirm the labels come from `locales/en.json`, so nothing is hardcoded: a quick grep for quoted display strings in `features/orders/` should return none.
+- [x] Switch between two order types (document and parcel) and confirm the labels come from `locales/en.json`, so nothing is hardcoded: a quick grep for quoted display strings in `features/orders/` should return none.
 
 ## AC-9: cancel, with copy that matches the server's refund rule
 
-- [ ] Card on a `searching` order paid by card. Cancel appears on the detail and in the card menu. The dialog states plainly that no money comes back in this build, because the mock provider cannot refund a card and an unpaid order was never charged. Confirm, and the order becomes `cancelled`, lands in Past, and the timeline gains the cancel step, all without a manual refresh.
-- [ ] Wallet order in `assigned`. The dialog states the wallet refund. Confirm, then `select wallet_balance();` (as that customer) shows the balance back by `total_kobo`. The sentence and the server agree; that is the whole point of this criterion.
-- [ ] A `pending_payment` order offers Cancel too, and its dialog must not promise a refund.
-- [ ] Once the order reaches `picked_up`, Cancel is gone from both places. To prove the server is the authority and not the button: open the confirm dialog on an `assigned` order, then let the courier move it to `at_pickup` from the other session, then press confirm. The server refuses and the screen shows the refusal copy through `errorLabel`. The client never wrote the status at any point.
-- [ ] From a SQL editor session as that customer, `select public.change_order_status('<delivered order>', 'cancelled');` raises `order.invalid_transition`.
+- [x] Card on a `searching` order paid by card. Cancel appears on the detail and in the card menu. The dialog states plainly that no money comes back in this build, because the mock provider cannot refund a card and an unpaid order was never charged. Confirm, and the order becomes `cancelled`, lands in Past, and the timeline gains the cancel step, all without a manual refresh.
+- [x] Wallet order in `assigned`. The dialog states the wallet refund. Confirm, then `select wallet_balance();` (as that customer) shows the balance back by `total_kobo`. The sentence and the server agree; that is the whole point of this criterion.
+- [x] A `pending_payment` order offers Cancel too, and its dialog must not promise a refund.
+- [x] Once the order reaches `picked_up`, Cancel is gone from both places. To prove the server is the authority and not the button: open the confirm dialog on an `assigned` order, then let the courier move it to `at_pickup` from the other session, then press confirm. The server refuses and the screen shows the refusal copy through `errorLabel`. The client never wrote the status at any point.
+- [x] From a SQL editor session as that customer, `select public.change_order_status('<delivered order>', 'cancelled');` raises `order.invalid_transition`.
 
 ## AC-10: the card overflow menu
 
-- [ ] The menu opens on a card with an accessible label. It offers Cancel only when the status allows it, and always offers Copy tracking code.
-- [ ] Copy, then paste into any text field. It pastes the code with the display prefix, `TN-<code>`, matching what the card shows.
+- [x] The menu opens on a card with an accessible label. It offers Cancel only when the status allows it, and always offers Copy tracking code.
+- [x] Copy, then paste into any text field. It pastes the code with the display prefix, `TN-<code>`, matching what the card shows.
 
 ## AC-11: realtime keeps the screens fresh without a manual refresh
 
-- [ ] Open the Orders tab on customer A's device. From the courier session, accept a job or move it forward. The chip on that card changes, and the order moves between Active and Past by itself.
-- [ ] Open that order's detail and keep it on screen. The status line and the new timeline step appear with no pull to refresh. This is the trio working: the list query, the detail query, and that order's events query all invalidate on one row change. The events table is not in the publication, which is why the events query is invalidated from the order row change.
-- [ ] Book a fresh order and watch the tab. It appears without a reload.
-- [ ] Break the subscription on purpose: background the app for a few minutes, change the status meanwhile, come back. Refetch on focus covers the gap, so the screen is correct within a moment of return.
+- [x] Open the Orders tab on customer A's device. From the courier session, accept a job or move it forward. The chip on that card changes, and the order moves between Active and Past by itself.
+- [x] Open that order's detail and keep it on screen. The status line and the new timeline step appear with no pull to refresh. This is the trio working: the list query, the detail query, and that order's events query all invalidate on one row change. The events table is not in the publication, which is why the events query is invalidated from the order row change.
+- [x] Book a fresh order and watch the tab. It appears without a reload.
+- [x] Break the subscription on purpose: background the app for a few minutes, change the status meanwhile, come back. Refetch on focus covers the gap, so the screen is correct within a moment of return.
 
 ## AC-12: home shows up to three active deliveries
 
-- [ ] On an account with no active orders, the section is not on the page at all.
-- [ ] Book one, then a second, then a third. Each appears, newest first.
+- [x] On an account with no active orders, the section is not on the page at all.
+- [x] Book one, then a second, then a third. Each appears, newest first.
 - [ ] Book a fourth. Home still shows three, and the oldest active one is the one that dropped. View all routes to the Orders tab.
 - [ ] Cancel one from home's card. The section updates by itself (same subscription, same invalidation).
 
 ## AC-13: the confirmation screen reaches the order
 
-- [ ] Complete a booking. On the confirmation, tap View order. The detail opens for exactly that order, and the tracking number on the confirmation matches the one in the detail header.
+- [x] Complete a booking. On the confirmation, tap View order. The detail opens for exactly that order, and the tracking number on the confirmation matches the one in the detail header.
 
 ## AC-14: the four states stay distinguishable
 
-- [ ] No orders at all (a fresh account, or customer B): the empty state with the book a delivery call to action.
-- [ ] Orders exist but the filter or the search matches nothing: different copy plus a clear action. Both must be visibly not the same screen as the first.
-- [ ] Failed load: enable airplane mode, open the tab. The error state with retry. Turn it off and press retry; the list comes back with no restart.
-- [ ] Someone else's id, and a made up id, render the identical not found state with a back action. That sameness is the point: existence is never revealed. Try both in a row and compare.
+- [x] No orders at all (a fresh account, or customer B): the empty state with the book a delivery call to action.
+- [x] Orders exist but the filter or the search matches nothing: different copy plus a clear action. Both must be visibly not the same screen as the first.
+- [x] Failed load: enable airplane mode, open the tab. The error state with retry. Turn it off and press retry; the list comes back with no restart.
+- [x] Someone else's id, and a made up id, render the identical not found state with a back action. That sameness is the point: existence is never revealed. Try both in a row and compare.
 
 ## AC-15: copy, tokens, accessibility
 
 - [ ] VoiceOver on iOS and TalkBack on Android, walking the tab and the detail. Every icon only control announces a purpose: search clear, the scan control (with its "arrives later" note), card overflow, Call, Chat, Copy, the sheet close.
 - [ ] Font scale at the largest setting. Card rows, status chips, the timeline, and the price lines wrap or scroll rather than clip.
 - [ ] Enable Reduce Motion at the system level. The sheet and the timeline settle without the animation; nothing that carries meaning disappears with it.
-- [ ] No raw hex, size, or radius in the new components: everything reads through the semantic token classes from DESIGN.md. Spot check `components/ui/status-timeline.tsx`, `features/orders/route-map.tsx`, `features/orders/order-actions.tsx`.
+- [x] No raw hex, size, or radius in the new components: everything reads through the semantic token classes from DESIGN.md. Spot check `components/ui/status-timeline.tsx`, `features/orders/route-map.tsx`, `features/orders/order-actions.tsx`.
 
 ## Value sourcing: every displayed number and word has a named origin
 
-- [ ] Card title: `orders.type` through the i18n map, so `parcel` reads "Parcel delivery".
-- [ ] Card second line: `orders.scheduled_at` formatted in `en-NG`. "Today" and "Tomorrow" follow the device's local day. When `scheduled_at` is null, the line shows the status label instead.
-- [ ] Tracking id: `orders.tracking_code` with the `TN-` display prefix added at render, never stored with it.
-- [ ] Status chip: `orders.status` through the i18n map, matching the label the detail uses for the same order.
-- [ ] Timeline: `order_events.status` plus `created_at`, collapsed by the fixed map in AC-5. A null `actor_id` on a cancelled event means the expiry job.
+- [x] Card title: `orders.type` through the i18n map, so `parcel` reads "Parcel delivery".
+- [x] Card second line: `orders.scheduled_at` formatted in `en-NG`. "Today" and "Tomorrow" follow the device's local day. When `scheduled_at` is null, the line shows the status label instead.
+- [x] Tracking id: `orders.tracking_code` with the `TN-` display prefix added at render, never stored with it.
+- [x] Status chip: `orders.status` through the i18n map, matching the label the detail uses for the same order.
+- [x] Timeline: `order_events.status` plus `created_at`, collapsed by the fixed map in AC-5. A null `actor_id` on a cancelled event means the expiry job.
 - [ ] Courier name: `profiles.first_name` and `last_name`, joined with a space. A courier with a null last name renders one word, not a trailing space or "null".
-- [ ] Courier phone: `profiles.phone`, nullable, and Call hides when null.
-- [ ] Vehicle type and number: only through the `courier_vehicle(order_id)` rpc.
-- [ ] Receipt amounts: `orders.*_kobo` through `lib/money`, formatted at display only.
-- [ ] Schedule line: the stored time, or the ASAP label when `scheduled_at` is null.
-- [ ] Whether Cancel shows: `orders.status` against the three legal source states, mirrored in the client. The server stays the authority (AC-9 proves it).
-- [ ] The money sentence inside the confirm dialog: `orders.status` and `orders.payment_method` against the server's refund rule. Wallet from `assigned` refunds; every other cancel in this build returns nothing.
-- [ ] Clipboard and dialer: `orders.tracking_code`, and the courier or receiver phone through `Linking`.
+- [x] Courier phone: `profiles.phone`, nullable, and Call hides when null.
+- [x] Vehicle type and number: only through the `courier_vehicle(order_id)` rpc.
+- [x] Receipt amounts: `orders.*_kobo` through `lib/money`, formatted at display only.
+- [x] Schedule line: the stored time, or the ASAP label when `scheduled_at` is null.
+- [x] Whether Cancel shows: `orders.status` against the three legal source states, mirrored in the client. The server stays the authority (AC-9 proves it).
+- [x] The money sentence inside the confirm dialog: `orders.status` and `orders.payment_method` against the server's refund rule. Wallet from `assigned` refunds; every other cancel in this build returns nothing.
+- [x] Clipboard and dialer: `orders.tracking_code`, and the courier or receiver phone through `Linking`.
+
+## Run log · 2026-10-20
+
+Driven on the iOS simulator (iPhone 17, dev build) against the local Supabase
+stack, real sign in via Mailpit OTP as customer A, customer B, and courier k1.
+Evidence screenshots in `.verify-evidence/` (00 through 33).
+
+Left unticked on purpose:
+
+- AC-2, page two under Active leaking a delivered order: not driven (needs a
+  filtered account with 21+ rows in one bucket; A's Active bucket sits just
+  under a page boundary).
+- AC-3, the known search-gap box: accepted as recorded in spec 0006, not
+  re-driven.
+- AC-8, the scheduled-slot line: only the ASAP branch was driven; no scheduled
+  order was booked.
+- AC-12, fourth order dropping the oldest plus View all: the cap itself is
+  proven (A has 19+ active orders, home shows exactly 3 newest first), the
+  View all tap was not separately driven.
+- AC-12, "cancel one from home's card": the home cards render no overflow or
+  cancel control at all (`app/(customer)/(tabs)/index.tsx` passes no
+  `onOverflowPress` to `OrderCard`). The cancel was driven from home through
+  the card's detail instead, and the section updated by itself with no manual
+  refresh (evidence 31, 32). The literal home-card affordance is not built.
+- AC-15, VoiceOver, font scale, and Reduce Motion: not drivable in this
+  environment (idb exposes the a11y tree, not VoiceOver audio or system
+  settings). Needs a manual pass.
+- Value sourcing, courier name: the join was observed ("Chidi Eze"); the
+  null-last-name edge was not driven.
+
+Findings:
+
+1. The card overflow button ("Order actions") is not exposed in the iOS
+   accessibility tree; it sits nested inside the card Pressable. VoiceOver
+   users may not reach it. AC-15 concern.
+2. In the dev build the Expo gear button overlaps the scan icon area; tapping
+   near the scan control can open the Expo tools overlay. Dev-build artifact
+   only, not a release issue.
+3. The scan control correctly renders disabled with its "arrives later"
+   announcement on a summary wrapper (trait `NotEnabled` in the a11y tree);
+   tapping does nothing.
 
 ## Known state of the local stack
 

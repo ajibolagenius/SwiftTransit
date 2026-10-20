@@ -17,7 +17,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 4 | Design system & UI primitives | Foundation | done |
 | 5 | Onboarding & authentication | Slice 1 | in-progress |
 | 6 | Create a delivery | Slice 1 | in-progress |
-| 7 | Orders list & order detail | Slice 1 | in-progress |
+| 7 | Orders list & order detail | Slice 1 | done |
 | 8 | Courier application & go online | Slice 2 | planned |
 | 9 | Delivery requests & lifecycle | Slice 2 | planned |
 | 10 | Live tracking & navigation | Slice 3 | planned |
@@ -110,7 +110,7 @@ The tracer-bullet core: home shortcuts and centre-action sheet into the 6-step w
 - [x] Document it: `/document create a delivery`
 Spec [0005](../specs/0005-create-a-delivery.md) · code in `features/deliveries/`, `app/(customer)/new-delivery/`, `lib/` (geo, money, payments, query, error-label), `supabase/` (migrations, `.test`, `functions/geo`), `locales/en.json`
 
-### 7. Orders list & order detail · in-progress
+### 7. Orders list & order detail · done
 Orders tab with all / active / past filters, tracking-number search, home "Active deliveries", order detail with status timeline.
 **Done when:** the customer sees their orders filtered correctly, can search by tracking number, and opens any order to see its status history.
 - [x] Design it (spec): `/architect orders list & order detail` → [0006](../specs/0006-orders-list-and-detail.md)
@@ -120,7 +120,7 @@ Orders tab with all / active / past filters, tracking-number search, home "Activ
    - [x] Actions: cancel with honest refund copy, overflow menu (AC-9, AC-10)
    - [x] Realtime helper wired into list, detail and events (AC-11)
    - [x] Home "Active deliveries", booking confirmation jump, empty, error, expired and not-found states, i18n, accessibility, tests (AC-12, AC-13, AC-14, AC-15)
-- [ ] Verify it: `/check verify orders list & order detail`
+- [x] Verify it: `/check verify orders list & order detail`
 - [x] Test it: `/test orders list & order detail`
 Spec [0006](../specs/0006-orders-list-and-detail.md) · code in `features/orders/`, `app/(customer)/(tabs)/orders.tsx`, `app/(customer)/orders/[id].tsx`, `app/(customer)/(tabs)/index.tsx`, `components/ui/status-timeline.tsx`, `lib/supabase/realtime.ts`, `supabase/` (migration, `.test/95_courier_vehicle.sql`), `__tests__/orders-*.test.tsx`
 
