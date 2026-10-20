@@ -42,7 +42,7 @@ Build with development builds (not Expo Go, because MapLibre and native sign-in 
 | Navigation | Expo Router 57 (typed routes) | File-based, deep links for tracking links, native stack + sheets |
 | Styling | NativeWind 4.2 (Tailwind 3 config) | Tokens from DESIGN.md become classes; `dark:` variants; v5 is still RC |
 | UI components | Own primitives in `components/ui/` built to DESIGN.md | Design is custom; a kit (gluestack) would be restyled anyway. Native Bloom blocks used as reference only |
-| Icons | `lucide-react-native` (pending Figma confirmation) | Consistent stroke icons, tree-shakeable |
+| Icons | `runeicons` Glass edition (build-time generated via `scripts/build-rune-icons.mjs`, rendered with `react-native-svg`) | Matches the Figma UI kit's glass glyphs; the package stays a devDependency and the app ships only the generated subset |
 | Animation & gestures | Reanimated 4, Gesture Handler, `expo-haptics` | UI-thread animation; what `animate-expo` assumes |
 | Sheets & modals | Expo Router `formSheet` / `modal` presentations | Native sheets, no extra library |
 | Maps | `@maplibre/maplibre-react-native` 11 | Open source, no vendor token or per-load fee |
