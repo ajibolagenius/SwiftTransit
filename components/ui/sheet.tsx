@@ -147,7 +147,7 @@ function SheetBody({
         accessibilityRole="button"
         accessibilityLabel={dismissLabel}
         onPress={exit}
-        style={[scrimStyle, { backgroundColor: colors.bg.inverse }]}
+        style={[scrimStyle, { backgroundColor: colors.bg.scrim }]}
         className="absolute inset-0"
       />
       <Animated.View
@@ -163,8 +163,8 @@ function SheetBody({
         >
           <View
             pointerEvents="none"
-            className="self-center rounded-full bg-tertiary"
-            style={{ width: 40, height: 4 }}
+            className="self-center rounded-full"
+            style={{ width: 40, height: 4, backgroundColor: colors.text.tertiary }}
           />
         </View>
         <View className="gap-5 pt-3">

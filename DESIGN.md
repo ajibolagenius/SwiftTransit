@@ -265,6 +265,7 @@ Mostly white (`neutral-0`) with `neutral-25`/`neutral-50` for quiet cards and tr
 | `bg/secondary` | neutral-25 | dark-surface |
 | `bg/tertiary` | neutral-50 | dark-surface |
 | `bg/inverse` | neutral-950 | neutral-0 |
+| `bg/scrim` | neutral-950 | neutral-950 |
 | `bg/brand` | green-900 | green-500 |
 | `bg/brand-subtle` | green-200 | dark-brand-subtle |
 | `bg/brand-soft` | green-100 | dark-brand-subtle |
