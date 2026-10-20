@@ -66,7 +66,7 @@ npx skills add pbakaus/impeccable ajibolagenius/vibe-secure-me DietrichGebert/po
 |---|---|
 | Plan and build features | `scope`, `architect`, `develop`, `check`, `test`, `debug`, `sync`, `audit`, `document` (jsmastery) |
 | Visual quality and UI critique | `impeccable` (reads PRODUCT.md + DESIGN.md), taste skills (`design-taste-frontend`, `high-end-visual-design`, `minimalist-ui`, `redesign-existing-projects`, `image-to-code`) |
-| Motion, gestures, haptics | `animate-expo`, `emil-design-eng`, `mobile-native`, `review-animations`, `animation-performance` |
+| Motion, gestures, haptics | `animate-expo`, `emil-design-eng`, `apple-design` (WWDC fluid-interface rules, distilled into DESIGN.md), `mobile-native`, `review-animations`, `animation-performance` |
 | Security | `secure-me`: run on every PR touching auth, RLS, storage, location or money |
 | Keep it simple | `ponytail`, `ponytail-review` |
 

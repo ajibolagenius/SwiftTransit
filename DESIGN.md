@@ -366,7 +366,17 @@ Light, desaturated basemap (Positron-style) so the green route and pins carry th
 
 ### Motion & feedback
 
-Follow the `animate-expo` and `emil-design-eng` skills. Defaults: press feedback scale 0.97 over ~100 ms; sheets and cards use springs (no bounce for UI chrome); step transitions in the wizard slide horizontally (~250 ms); list items do not animate on every render. Success moments (OTP verified, delivery booked) get one icon pop and a success haptic. Everything respects Reduce Motion (cross-fade instead of slide/scale). Haptics: light on selection, success on completion, warning on error. Never animate layout-critical numbers (balances) on every update; tick only on change.
+Follow the `animate-expo`, `emil-design-eng` and `apple-design` skills. Defaults: press feedback scale 0.97 over ~100 ms; sheets and cards use springs (no bounce for UI chrome); step transitions in the wizard slide horizontally (~250 ms); list items do not animate on every render. Success moments (OTP verified, delivery booked) get one icon pop and a success haptic. Everything respects Reduce Motion (cross-fade instead of slide/scale). Haptics: light on selection, success on completion, warning on error. Never animate layout-critical numbers (balances) on every update; tick only on change.
+
+Fluid-interface rules from `apple-design`, normative for every touch-driven surface:
+
+- **Respond on touch-down**, not release — press states begin on `pressIn` (see `use-press-scale`), never on completion callbacks.
+- **Springs, not durations.** Critically damped (`damping 1.0`, response 0.3–0.4 s) is the house default; allow bounce (~0.8) only where a flick carried momentum (sheet dismissal, the centre action).
+- **Interruptible and velocity-aware.** Gesture-driven surfaces (sheets, wizard swipes) track the finger 1:1, start new animations from the *presentation* value, and hand the release velocity to the spring — no input locks mid-transition.
+- **Project the flick landing point** (deceleration `0.998`) rather than snapping to the nearest stop from the release position.
+- **Spatial consistency.** Surfaces enter and exit along the same path; the centre-action sheet grows toward the FAB that opened it.
+- **Materials carry hierarchy.** The tab bar and floating cards are the only translucent layers; keep text on them at full token contrast (vibrancy), never flat grey, and honour `prefers-reduced-transparency` by falling back to solid `bg/primary`.
+- **Type details:** tracking is size-specific — display headings tighten (`letterSpacing` negative at `display-lg`), body stays at 0; line height tight for headings, loose for body; layout scales with font size via `maxFontSizeMultiplier`.
 
 ## Do's and Don'ts
 

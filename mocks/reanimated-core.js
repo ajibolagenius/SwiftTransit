@@ -17,10 +17,14 @@ function useAnimatedStyle(buildStyle) {
   return buildStyle();
 }
 
-function withTiming(target) {
+// The mock has no clock: animations resolve instantly, so the completion callback
+// (when given) fires synchronously with finished=true.
+function withTiming(target, _config, callback) {
+  if (callback) callback(true);
   return target;
 }
-function withSpring(target) {
+function withSpring(target, _config, callback) {
+  if (callback) callback(true);
   return target;
 }
 function withDelay(_ms, value) {
@@ -28,6 +32,11 @@ function withDelay(_ms, value) {
 }
 function withSequence(..._values) {
   return undefined;
+}
+
+// On the JS thread, runOnJS is a passthrough.
+function runOnJS(fn) {
+  return fn;
 }
 
 function AnimatedComponent(Component) {
@@ -73,6 +82,7 @@ module.exports = {
   withSpring,
   withDelay,
   withSequence,
+  runOnJS,
   LinearTransition: {},
   CurvedTransition: {},
   Keyframe: class {},
