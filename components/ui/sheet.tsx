@@ -1,7 +1,13 @@
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { Dimensions, Modal, Pressable, Text, View, type GestureResponderEvent } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconTile } from './icon-tile';
@@ -90,8 +96,11 @@ function SheetBody({
       rise.value = rise.value + offset.value / travel;
       offset.value = 0;
     }
+    // Animation completion callbacks run on the UI runtime in Reanimated 4,
+    // so the JS-thread onDismiss prop must be bounced back with runOnJS.
     const finish = (f?: boolean) => {
-      if (f) onDismiss();
+      'worklet';
+      if (f) runOnJS(onDismiss)();
     };
     rise.value = reduced
       ? withTiming(1, { duration: 0 }, finish)
