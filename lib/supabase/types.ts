@@ -656,6 +656,13 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      courier_vehicle: {
+        Args: { order_id: string };
+        Returns: {
+          vehicle_number: string;
+          vehicle_type: Database['public']['Enums']['vehicle_type'];
+        }[];
+      };
       create_order: {
         Args: { draft: Json; idempotency_key: string };
         Returns: {
@@ -695,6 +702,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      expire_pending_orders: { Args: never; Returns: number };
       is_order_participant: { Args: { order_id: string }; Returns: boolean };
       nearby_orders: {
         Args: { radius_km?: number };

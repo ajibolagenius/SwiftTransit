@@ -201,13 +201,10 @@ export default function BookedScreen() {
         </View>
 
         <View className="gap-4 pt-9">
-          {/* Feature 7 builds the order detail; the row is visible and unavailable now (AC-17 pattern). */}
-          <Button disabled onPress={() => undefined}>
-            {t('booked.viewOrder')}
-          </Button>
-          <Text className="text-center font-sans text-body-sm text-tertiary">
-            {t('booked.viewOrderHint')}
-          </Text>
+          {/* AC-13: the tracking code on this screen now leads to the order it names. */}
+          {params.orderId ? (
+            <Button onPress={() => router.push(`/orders/${params.orderId}`)}>{t('booked.viewOrder')}</Button>
+          ) : null}
           <Button variant="link" onPress={sendAnother}>
             {t('booked.sendAnother')}
           </Button>

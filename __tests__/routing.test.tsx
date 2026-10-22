@@ -23,8 +23,12 @@ jest.mock('../global.css', () => ({})); // NativeWind's CSS is compiled by Metro
 jest.mock('@maplibre/maplibre-react-native', () => ({ Map: () => null, Camera: () => null }));
 // Registration pulls in Supabase (and its encrypted SQLite storage), which the router test
 // never exercises. A stub keeps that native module out of the route tree render.
+// `getSession` answers with no session so the home screen's orders read stays disabled.
 jest.mock('@/lib/supabase', () => ({
-  supabase: { auth: { updateUser: jest.fn() }, rpc: jest.fn() },
+  supabase: {
+    auth: { updateUser: jest.fn(), getSession: jest.fn(() => Promise.resolve({ data: { session: null } })) },
+    rpc: jest.fn(),
+  },
 }));
 
 const signedIn = (role: 'customer' | 'courier' | null): AuthState => ({
