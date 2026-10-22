@@ -36,3 +36,4 @@ coverage/
 .metro-health-check*
 *.tsbuildinfo
 credentials.md
+.verify-evidence
